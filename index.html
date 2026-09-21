@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://textilegroup.github.io/wendell-users/guard.js"
         data-app="dashboard" data-barra="nao"></script>
-<title>WGI — Matriz de Custos</title>
+<title>Wendell Brasil Custos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@400;500;600;700&display=swap">
@@ -296,8 +296,7 @@ input.moeda:focus{outline:2px solid var(--wine-soft);outline-offset:1px}
 @media (max-width:1100px){.admgrid{grid-template-columns:1fr}.gridm{grid-template-columns:repeat(4,1fr)}}
 @media (max-width:560px){.gridm{grid-template-columns:repeat(3,1fr)}.admtop input.moeda{width:100%}}
 /* tela de custos (planilha simples) — so abre no modulo ADM */
-#cstModal{position:fixed;inset:0;z-index:98;display:grid;place-items:center;padding:18px;
-  background:rgba(20,19,22,.55);backdrop-filter:blur(2px)}
+#cstModal{display:block;padding:18px 18px 48px;max-width:1120px;margin:0 auto}
 #cstModal[hidden]{display:none}
 /* Wendell Custos: app dedicado só à Matriz de Custos — o modal abre sozinho
    e fica sem botão de fechar, já que aqui não existe painel por trás. */
@@ -761,204 +760,15 @@ footer{font-size:10.5px;color:var(--ink-3);text-align:center;padding:2px 0 0;lin
   <div class="logo">WGI</div>
   <div class="brand"><h1 id="hTitle"></h1><p id="hSub"></p></div>
   <div class="hdr-right">
-    <input type="file" id="fFile" accept=".xlsx,.xlsm" hidden>
-    <button class="hdr-chip" id="btnImport" type="button"></button>
-    <button class="hdr-chip" id="btnExport" type="button"></button>
-    <button class="hdr-chip" id="btnSave" type="button" hidden></button>
-    <button class="hdr-chip" id="btnPdf" type="button"></button>
-    <button class="hdr-chip" id="btnAdm" type="button"></button>
-    <div class="lang" id="fCur">
-      <button type="button" data-v="BRL">R$</button>
-      <button type="button" data-v="USD">US$</button>
-    </div>
     <div class="lang" id="fLang">
       <button type="button" data-v="en">EN</button>
       <button type="button" data-v="pt">PT</button>
     </div>
-    <span class="hdr-chip" id="period"></span>
     <span class="hdr-chip" id="whoami" hidden></span>
     <button class="hdr-chip" id="btnOut" type="button" hidden></button>
     <button class="hdr-chip" id="themeBtn" type="button"></button>
   </div>
 </header>
-<div class="pfilters" id="pfilters"></div>
-
-<div id="pwrap"><main id="pscale">
-  <section class="card no-print">
-    <div class="card-hd"><h2 id="lFilters"></h2><span class="sub" id="fcount"></span></div>
-    <div class="card-bd">
-      <div class="frow">
-        <div class="fgrp"><span class="lb" id="lRep"></span>
-          <div class="ms" id="msRep">
-            <button class="ms-btn" type="button" aria-expanded="false" aria-haspopup="true">
-              <span class="lab"></span><span class="cnt" hidden></span><span class="car">▾</span></button>
-            <div class="ms-pop" hidden>
-              <div class="ms-act"><button type="button" data-act="all"></button><button type="button" data-act="none"></button></div>
-              <div class="ms-list"></div>
-            </div>
-          </div>
-        </div>
-        <div class="fgrp"><span class="lb" id="lState"></span>
-          <div class="ms" id="msUf">
-            <button class="ms-btn" type="button" aria-expanded="false" aria-haspopup="true">
-              <span class="lab"></span><span class="cnt" hidden></span><span class="car">▾</span></button>
-            <div class="ms-pop" hidden>
-              <div class="ms-act"><button type="button" data-act="all"></button><button type="button" data-act="none"></button></div>
-              <div class="ms-list"></div>
-            </div>
-          </div>
-        </div>
-        <div class="fgrp"><span class="lb" id="lYear"></span>
-          <div class="ms" id="msAno">
-            <button class="ms-btn" type="button" aria-expanded="false" aria-haspopup="true">
-              <span class="lab"></span><span class="cnt" hidden></span><span class="car">▾</span></button>
-            <div class="ms-pop" hidden>
-              <div class="ms-act"><button type="button" data-act="all"></button><button type="button" data-act="none"></button></div>
-              <div class="ms-list"></div>
-            </div>
-          </div>
-        </div>
-        <div class="fgrp"><span class="lb" id="lMonth"></span>
-          <div class="ms" id="msMes">
-            <button class="ms-btn" type="button" aria-expanded="false" aria-haspopup="true">
-              <span class="lab"></span><span class="cnt" hidden></span><span class="car">▾</span></button>
-            <div class="ms-pop" hidden>
-              <div class="ms-act"><button type="button" data-act="all"></button><button type="button" data-act="none"></button></div>
-              <div class="ms-list"></div>
-            </div>
-          </div>
-        </div>
-        <div class="fgrp"><span class="lb" id="lGeo"></span>
-          <div class="pills" id="fGeo">
-            <button type="button" data-v="wh" id="lGeoWh"></button>
-            <button type="button" data-v="uf" id="lGeoUf"></button>
-          </div>
-        </div>
-        <div class="fgrp" id="grpCusto" hidden><span class="lb" id="lCusto"></span>
-          <div style="display:flex;gap:7px;align-items:center">
-            <div class="pills" id="fCusto"></div>
-            <button type="button" class="vercustos no-print" id="btnCustos"></button>
-          </div>
-        </div>
-        <div class="fgrp grow"><label for="fQ" id="lSearch"></label><input type="search" id="fQ"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="kpis">
-    <div class="kpi"><span class="lab" id="lK1"></span><span class="val" id="kTot"></span>
-      <span class="meta" id="kTotMeta"></span><div class="spark" id="kSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK2"></span><span class="val" id="kUf"></span>
-      <span class="meta" id="kUfMeta"></span><div class="spark" id="kUfSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK3"></span><span class="val" id="kAvg"></span>
-      <span class="meta" id="kAvgMeta"></span><div class="spark" id="kAvgSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK8"></span><span class="val" id="kTk"></span>
-      <span class="meta" id="kTkMeta"></span><div class="spark" id="kTkSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK4"></span><span class="val" id="kNew"></span>
-      <span class="meta" id="kNewMeta"></span><div class="spark" id="kNewSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK9"></span><span class="val" id="kConc"></span>
-      <span class="meta" id="kConcMeta"></span><div class="spark c2" id="kConcSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK5"></span><span class="val" id="kCom"></span>
-      <span class="meta" id="kComMeta"></span><div class="spark c2" id="kComSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK6"></span><span class="val" id="kMg"></span>
-      <span class="meta" id="kMgMeta"></span><div class="spark c3" id="kMgSpark"></div></div>
-    <div class="kpi"><span class="lab" id="lK7"></span><span class="val" id="kFrt"></span>
-      <span class="meta" id="kFrtMeta"></span><div class="spark c4" id="kFrtSpark"></div></div>
-  </section>
-
-  <section class="two">
-    <div class="stackcol">
-      <div class="card">
-        <div class="card-hd"><h2 id="lChart1"></h2>
-          <span class="legend">
-            <span><i style="background:var(--s1)"></i><b id="lLegInv"></b></span>
-            <span><i style="background:var(--s2)"></i><b id="lLegBack"></b></span>
-            <span id="legMeta" hidden><i class="ln meta"></i><b id="lLegTgt"></b></span>
-          </span>
-        </div>
-        <div class="card-bd">
-          <div class="bars" id="chart"><div class="grid-lines" id="glines"></div></div>
-          <div class="metas" id="metas"></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><h2 id="lChart2"></h2>
-          <span class="legend">
-            <span><i style="background:var(--s3)"></i><b id="lLegMg"></b></span>
-            <span><i class="hatch" style="background-color:var(--s3)"></i><b id="lLegPart"></b></span>
-          </span>
-        </div>
-        <div class="card-bd">
-          <div class="bars short" id="chartM"><div class="grid-lines" id="glinesM"></div></div>
-          <p class="hint" id="mgHint"></p>
-        </div>
-      </div>
-    </div>
-    <div class="sidecol">
-      <div class="card">
-        <div class="card-hd"><h2 id="lChart3"></h2><span class="sub" id="geoLab"></span></div>
-        <div class="card-bd"><div class="hbars" id="ufbars"></div><p class="hint" id="ufHint"></p></div>
-      </div>
-      <div class="card" id="cardWh">
-        <div class="card-hd"><h2 id="lChart4"></h2>
-          <span class="hdright"><span class="sub" id="lWhCrit"></span>
-            <div class="pills mini" id="fWh"></div></span>
-        </div>
-        <div class="card-bd">
-          <div class="split" id="whsplit"></div>
-          <div class="hbars whb" id="whbars"></div>
-          <div class="dests" id="whdest"></div>
-          <p class="hint" id="whHint"></p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="card-hd"><h2 id="lTable"></h2><span class="sub" id="tcount"></span></div>
-    <div class="tabs" id="tabs" role="tablist"></div>
-    <div class="tscroll">
-      <table><thead><tr id="thr"></tr></thead><tbody id="tb"></tbody>
-        <tfoot><tr id="pmore"><td id="pmoreTd"></td></tr><tr id="tf"></tr></tfoot></table>
-    </div>
-    <p class="hint tabhint" id="tabHint"></p>
-  </section>
-
-  <section class="card no-print" id="admCard" hidden>
-    <div class="card-hd"><h2 id="lAdm"></h2><span class="sub" id="admSub"></span></div>
-    <div class="card-bd">
-      <div class="frow admtop">
-        <div class="fgrp"><label for="aAno" id="lAdmAno"></label><select id="aAno"></select></div>
-        <div class="fgrp"><label for="aEq" id="lAdmEq"></label>
-          <input type="text" inputmode="decimal" id="aEq" class="moeda"></div>
-        <div class="fgrp"><label for="aAnual" id="lAdmAnual"></label>
-          <input type="text" inputmode="decimal" id="aAnual" class="moeda"></div>
-        <div class="fgrp"><span class="lb">&nbsp;</span>
-          <button class="admcalc" type="button" id="aCalc"></button></div>
-        <div class="fgrp"><span class="lb">&nbsp;</span>
-          <button class="admsave" type="button" id="aSalvar"></button></div>
-      </div>
-      <div class="admgrid">
-        <div class="admbloco">
-          <span class="lb" id="lAdmMeses"></span>
-          <div class="gridm" id="aMeses"></div>
-        </div>
-        <div class="admbloco">
-          <span class="lb" id="lAdmTris"></span>
-          <div class="gridt" id="aTris"></div>
-        </div>
-      </div>
-      <p class="hint" id="admHint"></p>
-    </div>
-  </section>
-
-  <section class="card no-print" id="newCard">
-    <div class="card-hd"><h2 id="lNew"></h2><span class="sub" id="newSub"></span></div>
-    <div class="card-bd"><div class="newlist" id="newList"></div></div>
-  </section>
-
-  <footer id="foot"></footer>
-</main></div>
 <div id="tip" role="status" aria-live="polite"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="cstModal" class="no-print" hidden>
@@ -996,66 +806,9 @@ footer{font-size:10.5px;color:var(--ink-3);text-align:center;padding:2px 0 0;lin
    para tapar buracos: se uma linha vier com #N/A ou em branco, o
    painel procura o cliente aqui antes de mostrar "—".
    ============================================================ */
-const UF_CLIENTE = {
-  "ARABELLA CONFECCOES LTDA": "",
-  "ARMARINHOS PALMARES DE ASSIS LTDA": "",
-  "AVERARA CONFECCOES LTDA": "",
-  "CLIO CONFECCOES IMPORTACAO E EXPORTACAO LTDA": "",
-  "COIMBRA SP INDUSTRIA E COMERCIO LTDA": "",
-  "CONFECCOES DALANT LTDA": "",
-  "DVORA HOUSE LTDA": "",
-  "ELVA CONFECCOES LTDA": "",
-  "EPELBAUM COMERCIO DE PRODUTOS LTDA": "",
-  "F. F. FASHION FACTORY LTDA": "",
-  "FLOR LINDA CONFECCOES LTDA": "",
-  "HALAVE CONFECCOES LTDA": "",
-  "IMAPER INDUSTRIA E COMERCIO LTDA": "",
-  "J H K CONFECCOES LTDA": "",
-  "JOAO ROBERTO PASSETTI": "",
-  "KFK INDUSTRIA E COMERCIO DE CONFECCOES LTDA": "",
-  "KYCO. LTDA": "",
-  "LABALABA BORDADOS LTDA": "",
-  "LARISSA VICTOR DE ARAUJO": "",
-  "LMX CONFECCOES LTDA": "",
-  "LUPO NORDESTE LTDA": "",
-  "M L DA SILVA CONFECCOES": "",
-  "M.R.T. COMERCIO VAREJISTA DE ARTIGOS DO VESTUARIO E ACESSORIOS LTDA": "",
-  "MILK' N ROSES CONFECCOES LTDA": "",
-  "MODAS LAVIDA LTDA": "",
-  "OY MODAS E PRODUCOES FOTOGRAFICAS E TEATRAIS LTDA": "",
-  "RAFFAEL ANDRADE PESSOA": "",
-  "RUBINELLA INDUSTRIA DE MODAS LTDA": "",
-  "SAGO PARGO CONFECCOES LTDA": "",
-  "SANTA AMELIA COMERCIO DE ARMARINHOS E TECIDOS LTDA": "",
-  "T. B. DE ANDRADE CONFECCAO LTDA": "",
-  "TARC DUBLAGENS INDUSTRIAIS LTDA": "",
-  "TECIDOS N.A. COMERCIAL LTDA.": "",
-  "THYAGO DALL EVEDOVE TEIXEIRA": "",
-  "TUTTO PRINT INDUSTRIA E COMERCIO LTDA": "",
-  "VIDA-LOKA CONFECCOES LTDA": "",
-  "VIENAS COMERCIO DE TECIDOS LTDA": "",
-  "WARDY CONFECCOES LTDA": "",
-  "YANN COMERCIO E INDUSTRIA LTDA": "",
-  "ZAYAN COMERCIO E CONFECCAO LTDA": "",
-  "ZEAIT IND E COM DE CONFECÇÕES LTDA": "",
-};
 
 /*DATA_START*/const DATA0 = {"meses":[],"atual":"","ano":2026,"fx":5.1,"rows":[],"reps":[],"clientes":[],"fonte":"Supabase"};/*DATA_END*/
 
-const MO_ALL = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
-/* A planilha de origem pode trazer o mes em portugues ou em ingles, abreviado
-   ou por extenso (SET / SEP / SEPTEMBER / SETEMBRO). Tudo cai no codigo interno,
-   que e o portugues abreviado. */
-const MES_IN = {JAN:'JAN',FEB:'FEV',FEV:'FEV',MAR:'MAR',APR:'ABR',ABR:'ABR',
-                MAY:'MAI',MAI:'MAI',JUN:'JUN',JUL:'JUL',AUG:'AGO',AGO:'AGO',
-                SEP:'SET',SET:'SET',OCT:'OUT',OUT:'OUT',NOV:'NOV',DEC:'DEZ',DEZ:'DEZ'};
-const normMes = v => MES_IN[String(v == null ? '' : v).trim().toUpperCase().slice(0,3)] || '';
-/* A planilha traz a UF em "Customer UF". Erros de fórmula (#N/A) e vazios
-   entram como "não informado" — nunca viram um estado de mentira. */
-const normUf = v => {
-  const x = String(v == null ? '' : v).trim().toUpperCase();
-  return (!x || x === '#N/A' || x === '#N/D' || x === 'N/A' || x === '-' || x === '0') ? null : x;
-};
 /* O SKU liga a venda (coluna "SKU LIMPO", AF) ao custo. Comparamos sem
    espacos: "WENFUSE 15 0100" e "WENFUSE15 0100" sao o mesmo item. */
 const normSku = v => String(v == null ? '' : v).toUpperCase().replace(/\s+/g, '');
@@ -1144,55 +897,6 @@ function custoEf(ref){
 const grpMembros = ref => ((CUSTOS.grupos || {})[ref] || []).filter(m=>m && m !== ref);
 /* item absorvido por um grupo: nao aparece como linha propria na guia Custos */
 const grpAbsorvido = sku => { const r = GRP_DE[normSku(sku)]; return !!r && r !== sku; };
-let CUSTO_USO = {dir:0, alt:0, sem:0, fix:0};
-let DATA = DATA0, M, MS, CUR, FX, COLS, R, ANOS, FIRST, LAST, FIRSTD, TEM_UF = false, SEM_UF = 0;
-let WHS = [];
-function boot(d){
-  DATA = d;
-  M = DATA.meses; FX = DATA.fx;
-  R = DATA.rows.map(r => ({mes:r[0],rep:r[1],wh:r[2],st:r[3],cli:r[4],brl:r[5],
-                           qtd:r[6],ped:r[7],dt:r[8],com:r[9],
-                           mg:r[10], mg0:r[10], cu:null, cufb:false,
-                           frRaw:(r[11]===undefined?null:r[11]), frt:0, frb:0,
-                           uf:normUf(r[12]),
-                           /* sku = chave de casamento; sku0 = como veio na planilha */
-                           sku:normSku(r[13]), sku0:String(r[13]==null?'':r[13]).trim(),
-                           ano:(r[8]?String(r[8]).slice(0,4):String(DATA.ano))}));
-  TEM_UF = R.some(r=>r.uf);
-  const whv = {};
-  R.filter(r=>r.st==='I' && r.wh).forEach(r=>{ whv[r.wh] = (whv[r.wh]||0) + r.brl; });
-  WHS = Object.keys(whv).sort((a,b)=> whv[b]-whv[a] || (a<b?-1:1));
-  SEM_UF = R.filter(r=>r.st==='I' && !r.uf && !UF_CLIENTE[r.cli]).length;
-  /* a planilha repete o frete do pedido em cada linha de item: consolida por
-     pedido e lanca o valor uma unica vez, na primeira linha do pedido */
-  const og = {};
-  R.filter(r=>r.st==='I').forEach(r=>{
-    const k = r.mes+'|'+r.ped+'|'+r.cli; (og[k] || (og[k] = [])).push(r);
-  });
-  Object.values(og).forEach(g=>{
-    const v = g.filter(r=>r.frRaw !== null && r.frRaw !== undefined).map(r=>r.frRaw);
-    if (!v.length) return;
-    g[0].frt = Math.max.apply(null, v);
-    g.forEach(r => r.frb = r.brl);
-  });
-  ANOS = [...new Set(R.map(r=>r.ano))].sort();
-  if (!M.length){ M = [MO_ALL[new Date().getMonth()]]; DATA.atual = M[0]; }
-  MS = M.slice(); CUR = DATA.atual || M[M.length-1]; COLS = [...M].reverse();
-  FIRST = {}; LAST = {}; FIRSTD = {};
-  R.filter(r=>r.st==='I').forEach(r=>{
-    const i = M.indexOf(r.mes);
-    if (FIRST[r.cli]===undefined || i < FIRST[r.cli]) FIRST[r.cli] = i;
-    if (r.dt && (FIRSTD[r.cli]===undefined || r.dt < FIRSTD[r.cli])) FIRSTD[r.cli] = r.dt;
-    if (LAST[r.cli]===undefined  || i > LAST[r.cli])  LAST[r.cli]  = i;
-  });
-}
-boot(DATA0);
-
-const MES_EN = {JAN:'JAN',FEV:'FEB',MAR:'MAR',ABR:'APR',MAI:'MAY',JUN:'JUN',
-                JUL:'JUL',AGO:'AUG',SET:'SEP',OUT:'OCT',NOV:'NOV',DEZ:'DEC'};
-const TABS = ['all','margem','novos','queda','inativos','reps','estados'];
-const DEFSORT = {novos:'in', queda:'perda', inativos:'tot', margem:'mgm'};
-const PRINT_ROWS = 8;
 
 const T = {
  pt:{
@@ -1686,64 +1390,19 @@ const T = {
  }
 };
 
-const S = {reps:new Set(), ufs:new Set(), anos:new Set(), meses:new Set(),
-           geo: TEM_UF ? 'uf' : 'wh', wh: WHS[0] || null, custo: CUSTOS.fontes[0],
-           cur:'BRL', q:'', sort:'tot', dir:-1, lang:'en', tab:'all'};
-/* recalcula o periodo visivel: meses selecionados (ou todos), o "mes atual"
-   passa a ser o ultimo mes da selecao */
-function syncPeriod(){
-  MS = S.meses.size ? M.filter(m=>S.meses.has(m)) : M.slice();
-  if (!MS.length) MS = M.slice();
-  CUR = MS[MS.length-1];
-  COLS = [...MS].reverse();
-}
+const S = {custo: CUSTOS.fontes[0], lang:'en'};
 const t = () => T[S.lang];
-const mn = m => S.lang==='en' ? (MES_EN[m]||m) : m;
 const loc = () => S.lang==='en' ? 'en-US' : 'pt-BR';
 
-const conv = v => S.cur==='BRL' ? v : v/FX;
-const sym  = () => S.cur==='BRL' ? 'R$' : 'US$';
-const nf0 = v => new Intl.NumberFormat(loc(),{maximumFractionDigits:0}).format(v);
-const nf1 = v => new Intl.NumberFormat(loc(),{minimumFractionDigits:1,maximumFractionDigits:1}).format(v);
 /* coeficientes de markup em 4 casas, como a tabela de precos ja usa */
 const nf4 = v => new Intl.NumberFormat(loc(),{minimumFractionDigits:4,maximumFractionDigits:4}).format(v);
-const money = v => sym()+' '+nf0(conv(v));
-function compact(v){
-  const x = conv(v), MI = S.lang==='en' ? 'M' : ' mi', K = S.lang==='en' ? 'k' : ' mil';
-  if (Math.abs(x) >= 1e6) return nf1(x/1e6)+MI;
-  if (Math.abs(x) >= 1e3) return nf0(Math.round(x/1e3))+K;
-  return nf0(x);
-}
-const pct = v => nf1(v)+'%';
-const fdate = iso => { const p = String(iso).split('-');
-  return p.length===3 ? (S.lang==='en' ? p[1]+'/'+p[2] : p[2]+'/'+p[1]) : String(iso); };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const ufOf = r => S.geo==='uf' ? (r.uf || UF_CLIENTE[r.cli] || '—') : r.wh;
 
-const filtered = () => {
-  const q = S.q.trim().toUpperCase();
-  return R.filter(r =>
-    MS.indexOf(r.mes) >= 0 &&
-    (!S.anos.size || S.anos.has(r.ano)) &&
-    (!S.reps.size || S.reps.has(r.rep)) &&
-    (!S.ufs.size  || S.ufs.has(ufOf(r))) &&
-    (!q || r.cli.includes(q)));
-};
 
 const el = id => document.getElementById(id);
 const set  = (id,v) => { const n = el(id); if (n) n.textContent = v; };
 const setH = (id,v) => { const n = el(id); if (n) n.innerHTML = v; };
 
-const tip = el('tip');
-function showTip(e, html){
-  tip.innerHTML = html; tip.style.opacity = 1;
-  const b = tip.getBoundingClientRect();
-  let x = e.clientX + 14, y = e.clientY - b.height - 10;
-  if (x + b.width > innerWidth - 8) x = e.clientX - b.width - 14;
-  if (y < 8) y = e.clientY + 18;
-  tip.style.left = x+'px'; tip.style.top = y+'px';
-}
-const hideTip = () => tip.style.opacity = 0;
 
 let toastT;
 function toast(msg, isErr){
@@ -1752,111 +1411,21 @@ function toast(msg, isErr){
   clearTimeout(toastT); toastT = setTimeout(()=>n.className = isErr?'err':'', isErr?9000:6000);
 }
 
-/* ================= multiselect ================= */
-function msInit(id, key, getOptions, fmt){
-  const F = fmt || (v=>v);
-  const root = el(id), btn = root.querySelector('.ms-btn'), pop = root.querySelector('.ms-pop');
-  const list = root.querySelector('.ms-list');
-  function paint(){
-    const L = t(), sel = S[key];
-    root.querySelectorAll('.ms-act button')[0].textContent = L.all;
-    root.querySelectorAll('.ms-act button')[1].textContent = L.clear;
-    const lab = btn.querySelector('.lab'), cnt = btn.querySelector('.cnt');
-    if (!sel.size){ lab.textContent = L.all; cnt.hidden = true; }
-    else if (sel.size === 1){ lab.textContent = F([...sel][0]); cnt.hidden = true; }
-    else { lab.textContent = L.nsel(sel.size); cnt.hidden = false; cnt.textContent = sel.size; }
-  }
-  function fill(){
-    const opts = getOptions();
-    [...S[key]].forEach(v=>{ if (!opts.includes(v)) S[key].delete(v); });
-    list.innerHTML = opts.map(o=>
-      '<label><input type="checkbox" value="'+esc(o)+'"'+(S[key].has(o)?' checked':'')+'><span>'+esc(F(o))+'</span></label>').join('');
-    paint();
-  }
-  list.addEventListener('change', e=>{
-    if (e.target.checked) S[key].add(e.target.value); else S[key].delete(e.target.value);
-    paint(); render();
-  });
-  root.querySelector('.ms-act').addEventListener('click', e=>{
-    const b = e.target.closest('button'); if(!b) return;
-    if (b.dataset.act === 'all') getOptions().forEach(o=>S[key].add(o)); else S[key].clear();
-    list.querySelectorAll('input').forEach(i=>i.checked = S[key].has(i.value));
-    paint(); render();
-  });
-  btn.addEventListener('click', ()=>{
-    const open = pop.hidden;
-    document.querySelectorAll('.ms-pop').forEach(p=>p.hidden = true);
-    document.querySelectorAll('.ms-btn').forEach(b=>b.setAttribute('aria-expanded','false'));
-    pop.hidden = !open; btn.setAttribute('aria-expanded', String(open));
-  });
-  return {fill, paint};
-}
-document.addEventListener('click', e=>{
-  if (!e.target.closest('.ms')) {
-    document.querySelectorAll('.ms-pop').forEach(p=>p.hidden = true);
-    document.querySelectorAll('.ms-btn').forEach(b=>b.setAttribute('aria-expanded','false'));
-  }
-});
-document.addEventListener('keydown', e=>{
-  if (e.key === 'Escape') document.querySelectorAll('.ms-pop').forEach(p=>p.hidden = true);
-});
-const MSREP = msInit('msRep','reps', ()=>DATA.reps.slice());
-const MSUF  = msInit('msUf','ufs',  ()=>[...new Set(R.filter(r=>r.st==='I').map(ufOf))].sort());
-const MSANO = msInit('msAno','anos', ()=>ANOS.slice());
-const MSMES = msInit('msMes','meses', ()=>M.slice(), m=>mn(m));
 
 /* ================= idioma ================= */
-function setPeriod(){
-  syncPeriod();
-  const anos = S.anos.size ? [...S.anos].sort().join('/') : ANOS.join('/');
-  set('period', anos+' · '+(MS.length===1 ? mn(MS[0]) : mn(MS[0])+'–'+mn(MS[MS.length-1])));
-}
 function applyLang(){
   const L = t();
   document.documentElement.lang = S.lang==='en' ? 'en' : 'pt-BR';
-  document.title = S.lang==='en' ? 'Wendell Brazil Sales' : 'Vendas Wendell Brasil';
   set('hTitle',L.htitle); set('hSub',L.hsub); set('themeBtn',L.theme);
   set('gTitle',L.htitle); set('gSub', L.carregando);
-  set('btnImport',L.imp); set('btnExport',L.exp); set('btnSave',L.save); set('btnPdf',L.pdf);
-  set('btnOut',L.sair); set('btnAdm', ADM ? L.admOn : L.admBtn);
-  set('lFilters',L.filters); set('lRep',L.rep); set('lState',L.state);
-  set('lYear',L.year); set('lMonth',L.month);
-  set('lGeo',L.geo); set('lGeoWh',L.geoWh); set('lGeoUf',L.geoUf);
-  set('lCusto',L.custo); set('lSearch',L.search);
-  set('btnCustos',L.verCustos); set('cstTitulo',L.cstTitulo);
+  set('btnOut',L.sair);
+  set('cstTitulo',L.cstTitulo);
   set('cstAdd',L.cstAdd); set('cstSave',L.cstSalvar); set('cstClose',L.cstFechar);
   set('cstExp',L.cstExp); set('cstImp',L.cstImp);
   set('cstUso',L.cstUso);
   const cq = el('cstQ');
   if (cq){ cq.placeholder = L.cstBusca; cq.setAttribute('aria-label', L.cstBusca); }
   if (!el('cstModal').hidden) cstRender();
-  el('fQ').placeholder = L.searchPh;
-  set('lK1',L.k1); set('lK2',L.k2); set('lK3',L.k3);
-  set('lK4',L.k4); set('lK5',L.k5); set('lK6',L.k6); set('lK7',L.k7);
-  set('lK8',L.k8); set('lK9',L.k9);
-  set('lAdm',L.adm); set('admSub',L.admSub); set('lAdmAno',L.admAno);
-  set('lAdmEq',L.admEq + ' · ' + sym()); set('lAdmAnual',L.admAnual + ' · ' + sym());
-  set('aSalvar',L.admSalvar); set('aCalc',L.admCalc);
-  setH('admHint', L.admMoeda(sym()) + ' ' + L.admHint);
-  if (ADM){ const L2 = t();
-    set('lAdmMeses', L2.admMeses(el('aAno').value));
-    set('lAdmTris',  L2.admTris(el('aAno').value));
-    document.querySelectorAll('#aMeses .mcamp label').forEach((n,i)=>
-      n.innerHTML = mn(MO_ALL[i]) + ' <small>' + el('aAno').value + '</small>');
-    document.querySelectorAll('#aTris .mcamp label').forEach((n,i)=>
-      n.innerHTML = triLab(TRIS[i]) + ' <small>' + L2.triMeses[TRIS[i]] + ' · ' + el('aAno').value + '</small>');
-  }
-  set('lChart1',L.chart1); set('lChart2',L.chart2); set('lChart3',L.chart3);
-  set('lChart4',L.chart4); set('lWhCrit',L.whCrit);
-  set('lLegInv',L.legInv); set('lLegBack',L.legBack);
-  set('lLegTgt',L.legTgt);
-  set('lLegMg',L.legMg); set('lLegPart',L.legPart);
-  set('lTable',L.table); set('lNew',L.newTitle);
-  setH('foot', S.lang==='en'
-    ? 'Source: '+esc(DATA.fonte)+' · '+DATA.rows.length+' item lines · fixed rate BRL '+nf1(FX).replace('.',',')+'/USD.<br>Revenue = sum of item value on <b>Invoiced</b> lines. Backlog = <b>TBI</b> lines. Commission and margin weighted by sales value.'
-    : 'Fonte: '+esc(DATA.fonte)+' · '+DATA.rows.length+' linhas de item · câmbio fixo R$ '+nf1(FX)+'/US$.<br>Faturamento = soma do valor por item das linhas <b>Invoiced</b>. Carteira = linhas <b>TBI</b>. Comissão e margem ponderadas pelo valor de venda.');
-  setPeriod();
-  MSREP.paint(); MSUF.paint(); MSANO.paint(); MSMES.fill();
 }
 
 /* ================= render ================= */
@@ -1866,27 +1435,6 @@ function applyLang(){
    tiver valor para aquele item, ele fica sem custo e a margem volta a ser a
    que veio na planilha de vendas. A chave CUSTO do painel so vale para item
    que ainda nao tenha escolha (situacao que garantirFontes() elimina). */
-function aplicaCusto(){
-  const iSel = CUSTOS.fontes.indexOf(S.custo);
-  CUSTO_USO = {dir:0, alt:0, sem:0, fix:0};
-  R.forEach(r=>{
-    /* item agrupado usa o custo do grupo: a referencia manda, e o que ela
-       tiver zerado vem do outro item do grupo */
-    const k = r.sku ? custoKey(r.sku) : '';
-    const c = k ? custoEf(k).v : null;
-    const fx = k ? CUSTOS.fontes.indexOf(CUSTOS.fixos[k] || '') : -1;
-    const i = fx >= 0 ? fx : iSel;
-    const u = (c && i >= 0) ? (+c[i] || 0) : 0;
-    if (u > 0 && r.qtd > 0 && r.brl > 0){
-      r.cu = u; r.cufb = false; r.cufix = fx >= 0; r.mg = (r.brl - r.qtd*u)/r.brl;
-      if (r.st==='I') CUSTO_USO[fx >= 0 ? 'fix' : 'dir'] += r.brl;
-    } else {
-      r.cu = null; r.cufb = false; r.cufix = false; r.mg = r.mg0;
-      if (r.st==='I') CUSTO_USO.sem += r.brl;
-    }
-  });
-}
-
 /* Sem "auto", todo item precisa de uma fonte escolhida. Quem ainda nao tem
    (base antiga, ou item novo vindo de planilha) recebe a fonte padrao salva:
    nada muda de valor na virada, e da para trocar item a item depois. */
@@ -1916,513 +1464,6 @@ function garantirFontes(){
 }
 function temCustos(){ return !!Object.keys(CUSTOS.itens).length; }
 
-function render(){
-  if (temCustos()) aplicaCusto();
-  setPeriod();
-  const L = t(), rows = filtered();
-  const inv = rows.filter(r=>r.st==='I'), tbi = rows.filter(r=>r.st==='T');
-
-  const byM = {}; MS.forEach(m=>byM[m]={v:0, cw:0, mw:0, mb:0, ft:0, fb:0});
-  inv.forEach(r=>{
-    const a = byM[r.mes]; if (!a) return;
-    a.v += r.brl; a.cw += r.brl*r.com;
-    a.ft += r.frt; a.fb += r.frb;
-    if (r.mg !== null && r.mg !== undefined){ a.mw += r.brl*r.mg; a.mb += r.brl; }
-  });
-  const totalInv = inv.reduce((a,r)=>a+r.brl,0);
-  const totalTbi = tbi.reduce((a,r)=>a+r.brl,0);
-  const active = MS.filter(m=>byM[m].v>0);
-  const avg = active.length ? totalInv/active.length : 0;
-  const iCur = M.indexOf(CUR), iSel = MS.indexOf(CUR), prev = MS[iSel-1];
-
-  /* 1 · faturamento */
-  const dPct = prev && byM[prev].v ? (byM[CUR].v-byM[prev].v)/byM[prev].v*100 : null;
-  setH('kTot','<small>'+sym()+'</small>'+compact(totalInv));
-  setH('kTotMeta',
-    (dPct===null?'':'<span class="delta '+(dPct>=0?'up':'down')+'">'+(dPct>=0?'▲':'▼')+' '+pct(Math.abs(dPct))+'</span> ')
-    + L.vs(mn(CUR), prev?mn(prev):null, money(byM[CUR].v)));
-  spark('kSpark', MS.map(m=>byM[m].v), iSel);
-
-  /* 2 · estado */
-  const byU = {};
-  inv.forEach(r=>{ const u=ufOf(r); byU[u]=(byU[u]||0)+r.brl; });
-  const uList = Object.entries(byU).sort((a,b)=>b[1]-a[1]);
-  const top = uList[0];
-  set('kUf', top ? top[0] : '—');
-  set('kUfMeta', top ? L.share(money(top[1]), nf1(top[1]/totalInv*100), uList.length) : '—');
-  spark('kUfSpark', uList.map(u=>u[1]), 0);
-  set('geoLab', S.geo==='uf' ? L.geoLabUf : L.geoLabWh);
-  const maxU = top ? top[1] : 1;
-  setH('ufbars', uList.map(x=>{
-    const sh = totalInv ? x[1]/totalInv*100 : 0;
-    return '<div class="hb'+(x[0]==='—'?' semuf':'')+'" data-uf="'+esc(x[0])+'" data-v="'+x[1]+'" data-p="'+nf1(sh)+'">'
-      +'<span class="uf">'+esc(x[0])+'</span>'
-      +'<span class="track"><span class="fill" style="width:'+Math.max(2,x[1]/maxU*100)+'%"></span></span>'
-      +'<span class="amt">'+money(x[1])+'</span>'
-      +'<span class="pc">'+pct(sh)+'</span></div>';
-  }).join('') || '<p class="hint">'+L.noData+'</p>');
-  setH('ufHint', S.geo!=='uf' ? L.hintWh
-    : (TEM_UF ? L.hintUfOk + (SEM_UF ? L.hintUfFalta(SEM_UF) : '') : L.hintUfEmpty));
-
-  /* 2b · dentro x fora do estado (WH x Customer UF) */
-  renderWh(inv);
-  syncCustoPills();
-
-  /* 3 · média */
-  setH('kAvg','<small>'+sym()+'</small>'+compact(avg));
-  set('kAvgMeta', L.avgMeta(active.length, money(avg*12)));
-  spark('kAvgSpark', MS.map(m=>byM[m].v), -1);
-
-  /* 4 · clientes novos */
-  const clis = [...new Set(inv.map(r=>r.cli))];
-  const newByM = {}; MS.forEach(m=>newByM[m]=0);
-  const novosMes = [];
-  clis.forEach(c=>{
-    const i = FIRST[c]; if (i===undefined) return;
-    if (newByM[M[i]] !== undefined) newByM[M[i]]++;
-    if (M[i]===CUR) novosMes.push(c);
-  });
-  set('kNew', novosMes.length);
-  set('kNewMeta', L.newMeta(mn(CUR), clis.length));
-  spark('kNewSpark', MS.map(m=>newByM[m]), iSel);
-
-  /* 5 · comissão ponderada */
-  const comW = inv.reduce((a,r)=>a+r.brl*r.com, 0);
-  const nPed = new Set(inv.filter(r=>r.com>0).map(r=>r.mes+'|'+r.ped+'|'+r.cli)).size;
-  set('kCom', totalInv ? pct(comW/totalInv*100) : '—');
-  set('kComMeta', L.comMeta(money(comW), nPed));
-  spark('kComSpark', MS.map(m=>byM[m].v ? byM[m].cw/byM[m].v*100 : 0), iSel);
-
-  /* 6 · margem ponderada */
-  const mgW = MS.reduce((a,m)=>a+byM[m].mw,0), mgB = MS.reduce((a,m)=>a+byM[m].mb,0);
-  const covTot = totalInv ? mgB/totalInv*100 : 0;
-  set('kMg', mgB ? pct(mgW/mgB*100) : '—');
-  set('kMgMeta', L.mgMeta(nf0(covTot)));
-  spark('kMgSpark', MS.map(m=>byM[m].mb ? byM[m].mw/byM[m].mb*100 : 0), iSel);
-
-  /* 7 · frete ponderado sobre o faturamento */
-  const frT = MS.reduce((a,m)=>a+byM[m].ft,0), frB = MS.reduce((a,m)=>a+byM[m].fb,0);
-  set('kFrt', frB ? pct(frT/frB*100) : '—');
-  set('kFrtMeta', L.frtMeta(money(frT), nf0(totalInv ? frB/totalInv*100 : 0)));
-  spark('kFrtSpark', MS.map(m=>byM[m].fb ? byM[m].ft/byM[m].fb*100 : 0), iSel);
-
-  /* 8 · ticket médio por pedido */
-  const pedidos = new Set(inv.map(r=>r.mes+'|'+r.ped+'|'+r.cli));
-  const nTk = pedidos.size;
-  setH('kTk','<small>'+sym()+'</small>'+nf0(conv(nTk ? totalInv/nTk : 0)));
-  set('kTkMeta', L.tkMeta(nTk, nTk ? nf1(inv.length/nTk) : '0'));
-  spark('kTkSpark', MS.map(m=>{
-    const ps = new Set(inv.filter(r=>r.mes===m).map(r=>r.ped+'|'+r.cli)).size;
-    return ps ? byM[m].v/ps : 0;
-  }), iSel);
-
-  /* 9 · concentração da carteira */
-  const porCli = {};
-  inv.forEach(r=>{ porCli[r.cli] = (porCli[r.cli]||0) + r.brl; });
-  const ord = Object.values(porCli).sort((a,b)=>b-a);
-  const share = n => totalInv ? ord.slice(0,n).reduce((a,v)=>a+v,0)/totalInv*100 : 0;
-  set('kConc', ord.length ? pct(share(5)) : '—');
-  set('kConcMeta', L.concMeta(pct(share(10)), ord.length));
-  spark('kConcSpark', ord.slice(0,8), 0);
-
-  /* gráfico faturamento */
-  const MT = metaAno();
-  const semFiltro = !S.reps.size && !S.ufs.size && !S.q.trim();
-  const marcar = MT && semFiltro;
-  /* A escala segue o FATURAMENTO. A meta só estica o eixo se estiver perto do
-     realizado (até 25%); metas muito acima ficariam esmagando os meses fracos,
-     então nesse caso a marca vai para o topo em vez de puxar a escala. */
-  const maxRev = Math.max.apply(null, MS.map(m=>byM[m].v).concat([byM[CUR].v+totalTbi, 1]));
-  const maxTgt = marcar ? Math.max.apply(null, MS.map(m=>+MT.mes[m]||0).concat([0])) : 0;
-  const maxBar = (maxTgt > maxRev && maxTgt <= maxRev*1.25) ? maxTgt*1.04 : maxRev;
-  const foraEscala = v => v > maxBar;
-  const posY = (v, off) => foraEscala(v) ? (off||0) : (100 - v/maxBar*100);
-
-  /* o ponto de equilíbrio saiu do gráfico: é anual e distorcia a escala.
-     Agora aparece só na faixa de metas, em reais. */
-  setH('glines',[0,25,50,75].map(p=>'<i class="gl" style="top:'+p+'%"></i>').join(''));
-  el('legMeta').hidden = !(marcar && maxTgt > 0);
-  renderMetas(MT, byM, totalInv, semFiltro);
-  drawBars('chart', MS.map(m=>{
-    const v = byM[m].v, tb = (m===CUR ? totalTbi : 0);
-    const alvo = marcar ? (+MT.mes[m] || 0) : 0;
-    /* a barra do mes corrente empilha faturado + carteira: o numero no topo
-       tem de ser o total da pilha, senao fica apoiado num valor que nao conta.
-       A divisao entre os dois aparece no tooltip e na legenda. */
-    return {m, label: (v+tb) ? compact(v+tb) : '',
-      alvo: alvo ? {y: foraEscala(alvo) ? 98 : alvo/maxBar*100,
-                    hit: v >= alvo, fora: foraEscala(alvo)} : null,
-      segs: (tb?[{cls:'bar b2', h:tb/maxBar*100}]:[]).concat([{cls:'bar', h:v/maxBar*100}]),
-      tip:'<span class="k">'+mn(m)+'/'+DATA.ano+'</span><b>'+money(v)+'</b> '+L.tipInv
-        + (tb?'<br><b style="color:var(--s2)">'+money(tb)+'</b> '+L.tipBack:'')
-        + (marcar && +MT.mes[m] > 0
-            ? '<br>'+L.refMeta+': <b>'+money(+MT.mes[m])+'</b> · '+pct(v/(+MT.mes[m])*100) : '')};
-  }));
-
-  /* gráfico margem */
-  const mg = MS.map(m=>{
-    const a = byM[m];
-    return {m, p: a.mb ? a.mw/a.mb*100 : null, cov: a.v ? a.mb/a.v*100 : 0};
-  });
-  const maxMg = Math.max.apply(null, mg.map(x=>Math.abs(x.p||0)).concat([1]));
-  setH('glinesM',[0,33,66].map(p=>'<i class="gl" style="top:'+p+'%"></i>').join(''));
-  drawBars('chartM', mg.map(x=>({
-    m: x.m,
-    label: x.p===null ? '–' : pct(x.p),
-    labelCls: x.p===null ? 'na' : '',
-    segs: x.p===null ? [{cls:'bar b3', h:0}]
-        : [{cls:'bar b3'+(x.p<0?' negv':'')+(x.cov<60?' part':''), h:Math.abs(x.p)/maxMg*100}],
-    tip: '<span class="k">'+mn(x.m)+'/'+DATA.ano+'</span>'
-       + (x.p===null ? L.tipNoMg
-         : '<b>'+pct(x.p)+'</b> '+L.tipMg+'<br>'+L.tipCov+': '+nf0(x.cov)+'% '+L.tipInv)
-  })));
-  setH('mgHint', temCustos() ? custoHintTxt() : L.mgHint(nf0(covTot)));
-
-  /* abas + tabela */
-  buildTabs(rows, inv, clis);
-  renderTable(rows, inv, byM, totalInv, totalTbi, iCur);
-
-  set('fcount', L.lines(inv.length, tbi.length));
-
-  const novosPorMes = MS.map(m=>[m, clis.filter(c=>M[FIRST[c]]===m)]).filter(x=>x[1].length).reverse();
-  set('newSub', L.newSub(clis.length));
-  setH('newList', novosPorMes.map(x=>
-    '<span><b>'+mn(x[0])+'</b> · '+x[1].length+': '
-    + x[1].map(c=>esc(c.split(' ').slice(0,2).join(' '))).join(', ')+'</span>').join('')
-    || '<span>'+L.noNew+'</span>');
-
-  MSUF.fill(); MSANO.fill();
-}
-
-/* ---- agregações por chave ---- */
-function agg(rows, keyOf){
-  const o = {};
-  rows.forEach(r=>{
-    const k = keyOf(r); if (k===undefined || k===null) return;
-    const a = o[k] || (o[k] = {key:k, cart:0, tot:0, m:{}, cw:0, mw:0, mb:0, mwM:{}, mbM:{}});
-    if (r.st==='T') a.cart += r.brl;
-    else {
-      a.m[r.mes] = (a.m[r.mes]||0)+r.brl; a.tot += r.brl; a.cw += r.brl*r.com;
-      /* margem ponderada: só entram as linhas que têm margem informada */
-      if (r.mg !== null && r.mg !== undefined){
-        a.mw += r.brl*r.mg; a.mb += r.brl;
-        a.mwM[r.mes] = (a.mwM[r.mes]||0) + r.brl*r.mg;
-        a.mbM[r.mes] = (a.mbM[r.mes]||0) + r.brl;
-      }
-    }
-  });
-  return Object.values(o);
-}
-
-function buildTabs(rows, inv, clis){
-  const L = t();
-  const nInat = clis.filter(c=>LAST[c] !== M.indexOf(CUR)).length;
-  const recM = MS.slice(-3), antM = MS.slice(-6, -3);
-  const nQueda = agg(rows, r=>r.cli).filter(o=>{
-    const a = antM.reduce((x,m)=>x+(o.m[m]||0),0), b = recM.reduce((x,m)=>x+(o.m[m]||0),0);
-    return a > 0 && a > b;
-  }).length;
-  const nMesMg = MS.filter(m=>inv.some(r=>r.mes===m && r.mg!==null && r.mg!==undefined)).length;
-  const counts = {all:agg(rows,r=>r.cli).length, margem:nMesMg,
-    novos:clis.filter(c=>FIRST[c]===M.indexOf(CUR)).length, queda:nQueda, inativos:nInat,
-    reps:agg(inv,r=>r.rep||'—').length, estados:agg(inv,r=>ufOf(r)).length};
-  setH('tabs', TABS.map(k=>
-    '<button class="tab" role="tab" data-tab="'+k+'" aria-selected="'+(S.tab===k)+'">'
-    + L.tabs[k] + '<span class="n">'+counts[k]+'</span></button>').join(''));
-}
-
-/* Aba "Margem por mês": as linhas são os meses, ordenados pela margem
-   ponderada. A margem de cada mês sai do que cada cliente comprou nele. */
-function tabelaMargemMes(inv){
-  const L = t();
-  const meses = MS.map(m=>{
-    const linhas = inv.filter(r=>r.mes===m);
-    const cli = {};
-    linhas.forEach(r=>{
-      const a = cli[r.cli] || (cli[r.cli] = {mw:0, mb:0, tot:0});
-      a.tot += r.brl;
-      if (r.mg !== null && r.mg !== undefined){ a.mw += r.brl*r.mg; a.mb += r.brl; }
-    });
-    const lista = Object.keys(cli).filter(k=>cli[k].mb > 0)
-      .map(k=>({cli:k, mg:cli[k].mw/cli[k].mb}))
-      .sort((a,b)=>b.mg-a.mg);
-    let mw = 0, mb = 0, tot = 0;
-    linhas.forEach(r=>{
-      tot += r.brl;
-      if (r.mg !== null && r.mg !== undefined){ mw += r.brl*r.mg; mb += r.brl; }
-    });
-    return {m, tot, mw, mb, mg: mb ? mw/mb*100 : null, cob: tot ? mb/tot*100 : 0,
-            nCli: Object.keys(cli).length,
-            melhor: lista[0] || null, pior: lista.length ? lista[lista.length-1] : null};
-  }).filter(x=>x.tot > 0);
-
-  const cols = [
-    {id:'mgm',  lab:L.colMargem,   get:x=>x.mg===null?'–':pct(x.mg), sortv:x=>x.mg,
-     cls:x=>x.mg===null?'zero':(x.cob<60?'parc':'cur'),
-     tit:x=>x.mg===null?L.mgSem:L.mgCob(nf0(x.cob))},
-    {id:'cob',  lab:L.colCob,      get:x=>nf0(x.cob)+'%', sortv:x=>x.cob, cls:()=>'zero'},
-    {id:'fat',  lab:L.colFat,      get:x=>nf0(conv(x.tot)), sortv:x=>x.tot},
-    {id:'ncli', lab:L.colClientes, get:x=>String(x.nCli), sortv:x=>x.nCli, cls:()=>'zero'},
-    {id:'melhor', lab:L.colMelhor, txt:true, sortv:x=>x.melhor?x.melhor.mg:null,
-     get:x=>x.melhor ? esc(x.melhor.cli)+' <b>'+pct(x.melhor.mg*100)+'</b>' : '–'},
-    {id:'pior',   lab:L.colPior,   txt:true, sortv:x=>x.pior?x.pior.mg:null,
-     get:x=>x.pior ? esc(x.pior.cli)+' <b>'+pct(x.pior.mg*100)+'</b>' : '–'}
-  ];
-  const ord = cols.filter(c=>c.id===S.sort)[0] || cols[0];
-  meses.sort((a,b)=>{
-    const x = ord.sortv(a), y = ord.sortv(b);
-    if (x === null && y === null) return 0;
-    if (x === null) return 1;
-    if (y === null) return -1;
-    return (x-y)*S.dir;
-  });
-
-  const th = (id,lab,cls) =>
-    '<th data-sort="'+id+'" class="'+(cls||'')+'" tabindex="0" aria-sort="'
-    + (S.sort===id?(S.dir===1?'asc':'desc'):'none')+'">'+lab+'</th>';
-  setH('thr', th('key', L.colMes) + cols.map(c=>th(c.id, c.lab, c.txt?'txt':'')).join(''));
-  setH('tb', meses.length ? meses.map((x,i)=>
-    '<tr'+(i>=PRINT_ROWS?' class="pcut"':'')+'><td class="cli rk"><span class="pos">'+(i+1)+'</span>'
-    + mn(x.m)+'</td>'
-    + cols.map(c=>'<td class="'+(c.txt?'txt':'')+(c.cls?' '+c.cls(x):'')+'"'
-        + (c.tit?' title="'+esc(c.tit(x))+'"':'')+'>'+c.get(x)+'</td>').join('')
-    + '</tr>').join('')
-    : '<tr><td colspan="'+(cols.length+1)+'" class="empty">'+L.mesSemMargem+'</td></tr>');
-
-  let mw = 0, mb = 0, tot = 0;
-  meses.forEach(x=>{ mw += x.mw; mb += x.mb; tot += x.tot; });
-  setH('tf', '<td>'+L.tTotal+' · '+sym()+'</td>'
-    + '<td class="parc">'+(mb?pct(mw/mb*100):'–')+'</td>'
-    + '<td>'+(tot?nf0(mb/tot*100)+'%':'–')+'</td>'
-    + '<td>'+nf0(conv(tot))+'</td><td></td><td></td><td></td>');
-  el('pmoreTd').colSpan = cols.length+1;
-  set('pmoreTd', meses.length>PRINT_ROWS ? L.pmore(meses.length-PRINT_ROWS) : '');
-  el('pmore').style.visibility = meses.length>PRINT_ROWS ? 'visible' : 'collapse';
-  set('tcount', L.tcount(meses.length, sym()));
-  set('lTable', L.table + ' · ' + L.tabs.margem);
-  setH('tabHint', L.mgMesHint);
-}
-
-function renderTable(rows, inv, byM, totalInv, totalTbi, iCur){
-  const L = t();
-  setH('tabHint','');
-  if (S.tab === 'margem'){ tabelaMargemMes(inv); return; }
-  let list, extra = [], trail = [], showTot = true, firstLab = L.tCli, rank = false;
-
-  if (S.tab === 'reps'){
-    firstLab = L.colRep; rank = true; showTot = true;
-    list = agg(rows, r=>r.rep || '—');
-    trail = [
-      {id:'share', lab:L.colShare, get:o=>totalInv?pct(o.tot/totalInv*100):'–'},
-      {id:'com',   lab:L.colCom,   get:o=>o.tot?pct(o.cw/o.tot*100):'–'}
-    ];
-  } else if (S.tab === 'estados'){
-    firstLab = L.colUf; rank = true;
-    list = agg(rows, r=>ufOf(r));
-    trail = [{id:'share', lab:L.colShare, get:o=>totalInv?pct(o.tot/totalInv*100):'–'}];
-  } else {
-    list = agg(rows, r=>r.cli);
-    if (S.tab === 'all'){
-      rank = true;
-    } else if (S.tab === 'novos'){
-      list = list.filter(o=>FIRST[o.key] === iCur);
-      extra = [{id:'in', lab:L.colIn,
-                get:o=>FIRSTD[o.key] ? fdate(FIRSTD[o.key]) : mn(M[FIRST[o.key]]),
-                sortv:o=>FIRSTD[o.key]||''}];
-    } else if (S.tab === 'queda'){
-      /* últimos 3 meses da seleção contra os 3 anteriores */
-      const rec = MS.slice(-3), ant = MS.slice(-6, -3);
-      const soma = (o, ms) => ms.reduce((a,m)=>a+(o.m[m]||0), 0);
-      list = list.map(o=>{
-        o.ant = soma(o, ant); o.rec = soma(o, rec); o.perda = o.ant - o.rec;
-        return o;
-      }).filter(o=>o.ant > 0 && o.perda > 0);
-      extra = [
-        {id:'ant',   lab:L.colAntes, num:true, get:o=>nf0(conv(o.ant)),  sortv:o=>o.ant},
-        {id:'rec',   lab:L.colAgora, num:true, get:o=>o.rec?nf0(conv(o.rec)):'–', sortv:o=>o.rec},
-        {id:'perda', lab:L.colPerda, num:true, cls:'warn', get:o=>nf0(conv(o.perda)), sortv:o=>o.perda},
-        {id:'var',   lab:L.colVar,   num:true, cls:'warn',
-         get:o=>o.ant?pct(-(o.perda/o.ant*100)):'–', sortv:o=>o.ant?-(o.perda/o.ant):0}
-      ];
-    } else if (S.tab === 'inativos'){
-      list = list.filter(o=>FIRST[o.key] !== undefined && LAST[o.key] !== iCur);
-      extra = [
-        {id:'last', lab:L.colLast, get:o=>mn(M[LAST[o.key]]), sortv:o=>LAST[o.key]},
-        {id:'gap',  lab:L.colGap,  get:o=>String(iCur-LAST[o.key]), sortv:o=>iCur-LAST[o.key], cls:'warn'}
-      ];
-    }
-  }
-
-  /* margem ponderada da linha: Σ(margem × valor) ÷ Σ(valor com margem)
-     — a primeira sobre todo o período filtrado, a segunda só sobre o mês atual */
-  extra = [{
-    id:'mgm', lab:L.colMargemGer, num:true,
-    get: o => o.mb ? pct(o.mw/o.mb*100) : '–',
-    sortv: o => o.mb ? o.mw/o.mb : null,
-    clsOf: o => !o.mb ? 'zero' : (o.tot && o.mb/o.tot < 0.6 ? 'parc' : ''),
-    titOf: o => o.mb && o.tot ? L.mgCob(nf0(o.mb/o.tot*100)) : L.mgSem
-  },{
-    id:'mgmes', lab:L.colMargemMes+' <small>'+mn(CUR)+'</small>', num:true,
-    get: o => o.mbM[CUR] ? pct(o.mwM[CUR]/o.mbM[CUR]*100) : '–',
-    sortv: o => o.mbM[CUR] ? o.mwM[CUR]/o.mbM[CUR] : null,
-    clsOf: o => !o.mbM[CUR] ? 'zero'
-              : ((o.m[CUR]||0) && o.mbM[CUR]/o.m[CUR] < 0.6 ? 'parc' : ''),
-    titOf: o => o.mbM[CUR] && o.m[CUR]
-              ? L.mgMesCob(mn(CUR), nf0(o.mbM[CUR]/o.m[CUR]*100)) : L.mgMesSem(mn(CUR))
-  }].concat(extra);
-
-  const valOf = (o,k) => k==='tot' ? o.tot : k==='cart' ? o.cart
-    : k==='key' ? o.key
-    : (extra.concat(trail).find(x=>x.id===k)||{}).sortv ? extra.concat(trail).find(x=>x.id===k).sortv(o)
-    : k==='share' ? o.tot : k==='com' ? (o.tot?o.cw/o.tot:0)
-    : (o.m[k]||0);
-  const fixed = (S.tab==='all'||S.tab==='reps'||S.tab==='estados') && S.sort==='tot' && S.dir===-1;
-  if (!fixed){
-    list.sort((a,b)=>{
-      const x = valOf(a,S.sort), y = valOf(b,S.sort);
-      /* linhas sem o dado (ex.: cliente sem margem) ficam sempre no fim */
-      if (x === null && y === null) return 0;
-      if (x === null) return 1;
-      if (y === null) return -1;
-      if (typeof x === 'string' || typeof y === 'string')
-        return String(x)<String(y) ? -S.dir : String(x)>String(y) ? S.dir : 0;
-      return (x-y)*S.dir;
-    });
-  } else list.sort((a,b)=>b.tot-a.tot);
-
-  const th = (id,lab,cls) =>
-    '<th data-sort="'+id+'" class="'+(cls||'')+'" tabindex="0" aria-sort="'
-    + (S.sort===id?(S.dir===1?'asc':'desc'):'none')+'">'+lab+'</th>';
-  setH('thr', th('key',firstLab)
-    + extra.map(x=>th(x.id,x.lab,x.num?'':'txt')).join('')
-    + th('cart',L.tCart,'cart')
-    + COLS.map(m=>th(m, mn(m)+(m===CUR?' ●':''), m===CUR?'cur':'')).join('')
-    + th('tot',L.tTot,'tot')
-    + trail.map(x=>th(x.id,x.lab)).join(''));
-
-  const nCols = 2 + extra.length + COLS.length + trail.length;
-  setH('tb', list.length ? list.map((o,i)=>{
-    const nv = S.tab!=='reps' && S.tab!=='estados' && FIRST[o.key]===iCur;
-    return '<tr'+(i>=PRINT_ROWS?' class="pcut"':'')+'>'
-      + '<td class="cli'+(nv?' novo':'')+(rank?' rk':'')+'" title="'+esc(o.key)+'">'
-      + (rank?'<span class="pos">'+(i+1)+'</span>':'') + esc(o.key)
-      + (nv?'<span class="tag">'+L.newTag+'</span>':'') + '</td>'
-      + extra.map(x=>{
-          const cl = x.clsOf ? x.clsOf(o) : (x.cls || '');
-          const ti = x.titOf ? x.titOf(o) : '';
-          return '<td class="'+(x.num?'':'txt')+(cl?' '+cl:'')+'"'
-               + (ti?' title="'+esc(ti)+'"':'')+'>'+x.get(o)+'</td>';
-        }).join('')
-      + '<td class="cart'+(o.cart?'':' zero')+'">'+(o.cart?nf0(conv(o.cart)):'–')+'</td>'
-      + COLS.map(m=>{const v=o.m[m]||0;
-          return '<td class="'+(m===CUR?'cur':'')+(v?'':' zero')+'">'+(v?nf0(conv(v)):'–')+'</td>';}).join('')
-      + '<td class="tot">'+nf0(conv(o.tot))+'</td>'
-      + trail.map(x=>'<td>'+x.get(o)+'</td>').join('')
-      + '</tr>';
-  }).join('') : '<tr><td colspan="'+nCols+'" class="empty">'
-      + (S.tab==='queda' ? L.quedaVazio : L.noRows) + '</td></tr>');
-
-  el('pmoreTd').colSpan = nCols;
-  set('pmoreTd', list.length>PRINT_ROWS ? L.pmore(list.length-PRINT_ROWS) : '');
-  el('pmore').style.visibility = list.length>PRINT_ROWS ? 'visible' : 'collapse';
-
-  const fCart = list.reduce((a,o)=>a+o.cart,0);
-  const fTot  = list.reduce((a,o)=>a+o.tot,0);
-  const fM = {}; COLS.forEach(m=>fM[m] = list.reduce((a,o)=>a+(o.m[m]||0),0));
-  setH('tf', '<td>'+L.tTotal+' · '+sym()+'</td>'
-    + extra.map(x=>'<td'+(x.id==='mgm'||x.id==='mgmes'?' class="parc"':'')+'>'
-        +(x.id==='mgm' ? (()=>{ const w=list.reduce((a,o)=>a+o.mw,0), bs=list.reduce((a,o)=>a+o.mb,0);
-                                return bs ? pct(w/bs*100) : '–'; })()
-        : x.id==='mgmes' ? (()=>{ const w=list.reduce((a,o)=>a+(o.mwM[CUR]||0),0),
-                                        bs=list.reduce((a,o)=>a+(o.mbM[CUR]||0),0);
-                                  return bs ? pct(w/bs*100) : '–'; })()
-        : x.id==='ant' ? nf0(conv(list.reduce((a,o)=>a+o.ant,0)))
-        : x.id==='rec' ? (list.reduce((a,o)=>a+o.rec,0) ? nf0(conv(list.reduce((a,o)=>a+o.rec,0))) : '–')
-        : x.id==='perda' ? nf0(conv(list.reduce((a,o)=>a+o.perda,0))) : '')+'</td>').join('')
-    + '<td style="color:var(--s2)">'+(fCart?nf0(conv(fCart)):'–')+'</td>'
-    + COLS.map(m=>'<td>'+(fM[m]?nf0(conv(fM[m])):'–')+'</td>').join('')
-    + '<td>'+nf0(conv(fTot))+'</td>'
-    + trail.map(x=>{
-        if (x.id==='share') return '<td>'+(totalInv?pct(fTot/totalInv*100):'–')+'</td>';
-        if (x.id==='com'){ const cw = list.reduce((a,o)=>a+o.cw,0);
-          return '<td>'+(fTot?pct(cw/fTot*100):'–')+'</td>'; }
-        return '<td></td>';
-      }).join(''));
-
-  set('tcount', L.tcount(list.length, sym()));
-  set('lTable', L.tabs[S.tab] === L.tabs.all ? L.table : L.table+' · '+L.tabs[S.tab]);
-}
-
-/* faixa de alcance sob o gráfico: equilíbrio, mês, trimestre e ano */
-function renderMetas(MT, byM, totalInv, semFiltro){
-  const L = t(), host = el('metas');
-  if (!temMeta(MT)){
-    host.innerHTML = ADM ? '<p class="hint" style="margin:0;grid-column:1/-1">'+L.mtSemMeta+'</p>' : '';
-    return;
-  }
-  if (!semFiltro){
-    host.innerHTML = '<p class="hint" style="margin:0;grid-column:1/-1">'+L.mtFiltro+'</p>';
-    return;
-  }
-  const item = (k, txt, p, cls) =>
-    '<div class="mt '+(cls||'')+'"><span class="k">'+k+'</span><span class="v">'+txt+'</span>'
-    + '<span class="tr"><span class="fi" style="width:'+Math.min(100, Math.max(0,p))+'%"></span></span></div>';
-  const cls = p => p >= 100 ? 'ok' : (p >= 70 ? '' : 'low');
-  const out = [];
-
-  if (MT.eq > 0){
-    const ativos = MS.filter(m=>byM[m].v > 0);
-    const acima = ativos.filter(m=>byM[m].v >= MT.eq).length;
-    const p = ativos.length ? acima/ativos.length*100 : 0;
-    out.push(item(L.mtEq, money(MT.eq) + '<small>' + L.mtMeses(acima, ativos.length) + '</small>',
-      p, acima===ativos.length ? 'ok' : (acima ? '' : 'low')));
-  }
-  const alvoMes = +MT.mes[CUR] || 0;
-  if (alvoMes > 0){
-    const p = byM[CUR].v / alvoMes * 100;
-    out.push(item(L.mtMes + ' · ' + mn(CUR),
-      pct(p) + '<small>' + money(byM[CUR].v) + ' / ' + compact(alvoMes) + '</small>', p, cls(p)));
-  }
-  const iq = Math.floor(MO_ALL.indexOf(CUR)/3), qk = 'T'+(iq+1);
-  const alvoTri = +MT.tri[qk] || 0;
-  if (alvoTri > 0){
-    const meses = MO_ALL.filter((m,i)=>Math.floor(i/3)===iq && MS.indexOf(m) >= 0);
-    const v = meses.reduce((a,m)=>a + (byM[m] ? byM[m].v : 0), 0);
-    const p = v / alvoTri * 100;
-    out.push(item(L.mtTri + ' · ' + (S.lang==='en'?'Q':'T') + (iq+1),
-      pct(p) + '<small>' + money(v) + ' / ' + compact(alvoTri) + '</small>', p, cls(p)));
-  }
-  if (MT.ano_ > 0){
-    const p = totalInv / MT.ano_ * 100;
-    out.push(item(L.mtAno + ' · ' + MT.ano,
-      pct(p) + '<small>' + money(totalInv) + ' / ' + compact(MT.ano_) + '</small>', p, cls(p)));
-  }
-  host.innerHTML = out.join('');
-}
-
-function drawBars(id, cols){
-  const host = el(id);
-  host.querySelectorAll('.mcol').forEach(n=>n.remove());
-  cols.forEach(c=>{
-    const n = document.createElement('div');
-    n.className = 'mcol'+(c.m===CUR?' cur':'');
-    const hTot = c.segs.reduce((a,x)=>a+x.h, 0);
-    n.innerHTML = '<div class="stack"><div class="plot">'
-      + '<span class="mval '+(c.labelCls||'')+'" style="bottom:'+Math.min(hTot,96)+'%">'+c.label+'</span>'
-      + (c.alvo ? '<i class="tgt'+(c.alvo.hit?' hit':'')+(c.alvo.fora?' fora':'')
-                  + '" style="bottom:'+c.alvo.y+'%"></i>' : '')
-      + c.segs.map(s=>'<div class="'+s.cls+'" style="height:'+s.h+'%"></div>').join('')
-      + '</div></div><span class="mlab">'+mn(c.m)+'</span>';
-    n.addEventListener('mousemove', e=>showTip(e, c.tip));
-    n.addEventListener('mouseleave', hideTip);
-    host.appendChild(n);
-  });
-}
-function spark(id, vals, hi){
-  const max = Math.max.apply(null, vals.map(Math.abs).concat([1]));
-  setH(id, vals.map((v,i)=>
-    '<i class="'+(i===hi?'on':'')+'" style="height:'+Math.max(6,Math.abs(v)/max*100)+'%"></i>').join(''));
-}
 
 /* ---------- tela de custos: uma guia por fonte, celulas simples ----------
    Nao e uma planilha de verdade: so linhas e colunas para conferir e digitar.
@@ -2807,8 +1848,8 @@ function mkRender(){
   set('cstSub', L.mkSub(MARKUPS.length));
   set('cstCnt', '');
   /* UFs que aparecem nas vendas viram sugestao nos campos de origem/destino */
-  const ufs = [...new Set(R.map(r => r.uf).filter(Boolean))].sort();
-  const whs = [...new Set(R.map(r => r.wh).filter(Boolean))].sort();
+  const ufs = [];
+  const whs = [];
   const lista = [...new Set(whs.concat(ufs))];
   const campo = (i, k, v, cls) =>
     '<input class="' + cls + '" data-mk="' + i + '" data-k="' + k + '" value="' + esc(v) + '">';
@@ -3018,7 +2059,6 @@ function cstPreview(){
   if (cenNova(cen)) cstGuarda();
   cenParaCUSTOS(cen);
   CST_SUJO = cenNova(cen);
-  render();
   cstMarcaSujo();
 }
 el('cstGuias').addEventListener('click', e=>{
@@ -3219,7 +2259,6 @@ el('cstSave').onclick = async () => {
   } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
   finally { btn.disabled = false; }
 };
-el('btnCustos').onclick = cstAbrir;
 
 /* ============ exportar / importar a tabela de custos ============
    Uma planilha, aba TABELA: uma linha por item e uma COLUNA POR FONTE de
@@ -3330,161 +2369,6 @@ el('cstFile').onchange = async e => {
    fonte quando todos os itens usam a mesma, ou FONTE CUSTOMIZADA quando ha
    mais de uma em uso. Itens absorvidos por um grupo nao contam: quem manda
    e o item de referencia. */
-function fonteEmUso(){
-  const fs = new Set();
-  Object.keys(CUSTOS.itens || {}).forEach(k=>{
-    if (grpAbsorvido(k)) return;
-    const f = (CUSTOS.fixos || {})[k];
-    if (CUSTOS.fontes.indexOf(f) >= 0) fs.add(f);
-  });
-  if (fs.size === 1) return {f:[...fs][0], multi:false};
-  if (fs.size > 1) return {f:null, multi:true};
-  return {f: CUSTOS.fontes.indexOf(S.custo) >= 0 ? S.custo : CUSTOS.fontes[0], multi:false};
-}
-function syncCustoPills(){
-  const g = el('fCusto'), grp = el('grpCusto'); if (!g) return;
-  /* a fonte de custo e a tela de custos vivem no modulo ADM */
-  const on = ADM && temCustos() && CUSTOS.fontes.length > 0;
-  grp.hidden = !on;
-  if (!on) return;
-  if (CUSTOS.fontes.indexOf(S.custo) < 0) S.custo = CUSTOS.fontes[0];
-  const u = fonteEmUso();
-  cstMarcaSujo();
-  setH('fCusto', '<span class="fonte-uso'+(u.multi ? ' multi' : '')+'" title="'
-    + esc(u.multi ? t().custoMultiTip : t().custoUnicaTip(u.f)) + '">'
-    + esc(u.multi ? t().custoMulti : u.f) + '</span>');
-}
-function custoHintTxt(){
-  const L = t(), tt = CUSTO_USO.dir + CUSTO_USO.alt + CUSTO_USO.sem + CUSTO_USO.fix;
-  if (!tt) return L.custoSem;
-  const p = v => nf0(v/tt*100);
-  return L.custoHint(S.custo, p(CUSTO_USO.dir), p(CUSTO_USO.alt), p(CUSTO_USO.sem), p(CUSTO_USO.fix));
-}
-
-/* dentro x fora do estado: compara o armazem de origem (WH) com a UF do cliente */
-function syncWhPills(){
-  const g = el('fWh'); if (!g) return;
-  const k = WHS.join('|');
-  if (g.dataset.k !== k){
-    g.dataset.k = k;
-    setH('fWh', WHS.map(w=>'<button type="button" data-v="'+esc(w)+'">'+esc(w)+'</button>').join(''));
-  }
-  g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', S.wh===b.dataset.v));
-}
-function renderWh(inv){
-  const L = t(), box = el('cardWh'); if (!box) return;
-  if (!WHS.length){ box.hidden = true; return; }
-  box.hidden = false;
-  if (!WHS.includes(S.wh)) S.wh = WHS[0];
-  syncWhPills();
-  const w = S.wh;
-  let dentro = 0, fora = 0, semuf = 0; const dest = {};
-  inv.filter(r=>r.wh===w).forEach(r=>{
-    const u = r.uf || UF_CLIENTE[r.cli] || null;
-    if (!u) semuf += r.brl;
-    else if (u === w) dentro += r.brl;
-    else { fora += r.brl; dest[u] = (dest[u]||0) + r.brl; }
-  });
-  const tot = dentro + fora + semuf;
-  setH('whHint', L.whHint(w));
-  if (!tot){
-    setH('whsplit',''); setH('whdest','');
-    setH('whbars','<p class="hint">'+L.whNone(w)+'</p>');
-    return;
-  }
-  const p = v => v/tot*100;
-  const seg = (cls,v) => v<=0 ? ''
-    : '<span class="'+cls+'" style="width:'+p(v)+'%">'+(p(v)>=11 ? nf0(p(v))+'%' : '')+'</span>';
-  setH('whsplit', seg('in',dentro) + seg('out',fora) + seg('nou',semuf));
-  const linha = (cls,lab,v) =>
-    '<div class="hb'+(cls==='nou'?' semuf':'')+'" data-uf="'+esc(lab)+'" data-v="'+v+'" data-p="'+nf1(p(v))+'">'
-    +'<span class="uf">'+esc(lab)+'</span>'
-    +'<span class="track"><span class="fill '+cls+'" style="width:'+Math.max(2,p(v))+'%"></span></span>'
-    +'<span class="amt">'+money(v)+'</span>'
-    +'<span class="pc">'+pct(p(v))+'</span></div>';
-  setH('whbars', linha('in', L.whIn(w), dentro) + linha('out', L.whOut(w), fora)
-    + (semuf ? linha('nou', L.whNoUf, semuf) : ''));
-  const dl = Object.entries(dest).sort((a,b)=>b[1]-a[1]);
-  setH('whdest', dl.length
-    ? '<span class="dlab">'+esc(L.whDest)+'</span>' + dl.map(x=>'<b>'+esc(x[0])+'<i>'+money(x[1])+'</i></b>').join('')
-    : '');
-}
-
-/* ================= eventos ================= */
-el('fQ').oninput = e => { S.q = e.target.value; render(); };
-
-function pillGroup(id, key, after){
-  const g = el(id);
-  const sync = () => g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', S[key]===b.dataset.v));
-  g.addEventListener('click', e=>{
-    const b = e.target.closest('button'); if(!b || S[key]===b.dataset.v) return;
-    S[key] = b.dataset.v; if (after) after(); sync();
-    if (key==='lang') applyLang();
-    render();
-  });
-  sync(); return sync;
-}
-const syncGeo = pillGroup('fGeo','geo', ()=>{ S.ufs.clear(); });
-/* chamado sempre que a base muda: se a planilha tem UF, usa UF */
-function afterBoot(){
-  S.geo = TEM_UF ? 'uf' : 'wh';
-  if (!WHS.includes(S.wh)) S.wh = WHS[0] || null;
-  S.ufs.clear(); syncGeo();
-}
-const syncCur = pillGroup('fCur','cur', ()=>{ const a = CUR_ANT; CUR_ANT = S.cur; admMoeda(a); });
-/* idioma e moeda sao independentes: trocar EN/PT nao mexe mais na moeda */
-pillGroup('fLang','lang', ()=>{});
-
-el('tabs').addEventListener('click', e=>{
-  const b = e.target.closest('.tab'); if(!b || S.tab===b.dataset.tab) return;
-  S.tab = b.dataset.tab; S.sort = DEFSORT[S.tab] || 'tot'; S.dir = -1; render();
-});
-el('thr').addEventListener('click', e=>{
-  const th = e.target.closest('th[data-sort]'); if(!th) return;
-  const k = th.dataset.sort;
-  if (S.sort===k) S.dir = -S.dir; else { S.sort = k; S.dir = k==='key' ? 1 : -1; }
-  render();
-});
-el('thr').addEventListener('keydown', e=>{
-  if (e.key==='Enter'||e.key===' '){ e.preventDefault(); e.target.click(); }
-});
-const hbTip = e => {
-  const hb = e.target.closest('.hb'); if(!hb) return;
-  showTip(e, '<span class="k">'+esc(hb.dataset.uf)+'</span><b>'+money(+hb.dataset.v)+'</b> · '+hb.dataset.p+'%');
-};
-const ufb = el('ufbars');
-ufb.addEventListener('mousemove', hbTip);
-ufb.addEventListener('mouseleave', hideTip);
-const whb = el('whbars');
-whb.addEventListener('mousemove', hbTip);
-whb.addEventListener('mouseleave', hideTip);
-el('fWh').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || S.wh===b.dataset.v) return;
-  S.wh = b.dataset.v; render();
-});
-/* #fCusto virou indicador: a fonte se troca dentro de Ver custos */
-el('themeBtn').onclick = () => {
-  const c = document.documentElement.getAttribute('data-theme');
-  const dark = c ? c==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
-  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
-};
-
-/* ================= PDF ================= */
-function activeFilterText(){
-  const L = t(), p = [];
-  p.push(L.rep+': '+(S.reps.size?[...S.reps].join(', '):L.all));
-  p.push(L.state+': '+(S.ufs.size?[...S.ufs].join(', '):L.all));
-  p.push(L.month+': '+(S.meses.size?MS.map(mn).join(', '):L.all));
-  if (S.anos.size) p.push(L.year+': '+[...S.anos].sort().join(', '));
-  if (S.q.trim()) p.push(L.search+': "'+S.q.trim()+'"');
-  p.push(L.view+': '+L.tabs[S.tab]);
-  return p.join('  ·  ');
-}
-el('btnPdf').onclick = () => {
-  const L = t();
-  set('pfilters', L.pfilters(activeFilterText(), new Date().toLocaleString(loc())));
-  window.print();
-};
 /* ================= importar .xlsx ================= */
 const td = b => new TextDecoder('utf-8').decode(b);
 async function inflateRaw(bytes){
@@ -3564,86 +2448,7 @@ const serialToISO = v => {
   const d = new Date(Date.UTC(1899,11,30) + v*86400000);
   return isNaN(d) ? null : d.toISOString().slice(0,10);
 };
-let MISSING = [];
 const norm = s => String(s??'').toLowerCase().replace(/[^a-z0-9]/g,'');
-function findCol(head, ...cands){
-  for (const c of cands){
-    const i = head.findIndex(h => norm(h) === norm(c));
-    if (i >= 0) return i;
-  }
-  for (const c of cands){
-    const i = head.findIndex(h => norm(h).startsWith(norm(c)));
-    if (i >= 0) return i;
-  }
-  return -1;
-}
-function buildData(cells, fileName){
-  const head = cells[0] || [];
-  const c = {
-    mes:  findCol(head,'Month','Mês','Mes'),
-    rep:  findCol(head,'Rep','Representante'),
-    wh:   findCol(head,'WH','Warehouse'),
-    st:   findCol(head,'Status'),
-    cli:  findCol(head,'Customer','Cliente'),
-    brl:  findCol(head,'Total per item (BRL Value)','Total per item'),
-    qtd:  findCol(head,'Quantity (m)','Quantity'),
-    ped:  findCol(head,'Order Number','Pedido'),
-    dt:   findCol(head,'Date','Data'),
-    com:  findCol(head,'Comission','Commission','Comissão'),
-    mg:   findCol(head,'Margin','Margem'),
-    fr:   findCol(head,'Total Freight','Frete'),
-    uf:   findCol(head,'Customer UF','UF do Cliente','Estado do Cliente','UF','Estado'),
-    sku:  findCol(head,'SKU LIMPO','SKU','ID LIMPO','Item','Código limpo','Codigo limpo')
-  };
-  const NOME = {mes:'Month', st:'Status', cli:'Customer', brl:'Total per item (BRL Value)',
-                rep:'Rep', wh:'WH', qtd:'Quantity (m)', ped:'Order Number', dt:'Date',
-                com:'Comission', mg:'Margin', fr:'Total Freight', uf:'Customer UF',
-                sku:'SKU LIMPO'};
-  const falta = ['mes','st','cli','brl'].filter(k=>c[k]<0).map(k=>NOME[k]);
-  if (falta.length) throw new Error(t().impFalta(falta.join(', ')));
-  MISSING = ['rep','wh','ped','dt','com','mg','fr','uf','sku'].filter(k=>c[k]<0).map(k=>NOME[k]);
-  const rows = [];
-  for (let i = 1; i < cells.length; i++){
-    const r = cells[i] || [];
-    const cli = r[c.cli];
-    if (!cli || typeof cli !== 'string' || !String(cli).trim()) continue;
-    let mes = normMes(r[c.mes]);
-    /* mes ilegivel: tenta deduzir da data, em vez de descartar a linha calado */
-    if (!mes && c.dt >= 0){
-      const d = r[c.dt];
-      const iso = typeof d === 'number' ? serialToISO(d) : (d ? String(d) : '');
-      const mm = /^(\d{4})-(\d{2})/.exec(iso || '');
-      if (mm) mes = MO_ALL[+mm[2] - 1] || '';
-    }
-    if (!mes) continue;
-    const mgv = c.mg>=0 && typeof r[c.mg] === 'number' ? Math.round(r[c.mg]*1e6)/1e6 : null;
-    rows.push([mes,
-      c.rep>=0 ? String(r[c.rep]||'').trim() : '',
-      c.wh>=0  ? String(r[c.wh]||'').trim()  : '',
-      String(r[c.st]||'').trim().toLowerCase()==='invoiced' ? 'I' : 'T',
-      String(cli).trim(),
-      Math.round((+r[c.brl]||0)*100)/100,
-      +r[c.qtd] || 0,
-      c.ped>=0 ? String(r[c.ped]??'').trim() : '',
-      c.dt>=0 ? (typeof r[c.dt]==='number' ? serialToISO(r[c.dt]) : (r[c.dt]||null)) : null,
-      c.com>=0 ? (+r[c.com]||0) : 0,
-      mgv,
-      c.fr>=0 && typeof r[c.fr] === 'number' ? Math.round(r[c.fr]*100)/100 : null,
-      c.uf>=0 ? normUf(r[c.uf]) : null,
-      c.sku>=0 ? String(r[c.sku]||'').trim().toUpperCase() : '']);
-  }
-  if (!rows.length) throw new Error(t().impSemLinhas);
-  const meses = MO_ALL.filter(m => rows.some(r=>r[0]===m));
-  const anoRow = rows.find(r=>r[8]);
-  return {
-    meses, atual: meses[meses.length-1],
-    ano: anoRow ? +String(anoRow[8]).slice(0,4) : DATA.ano,
-    fx: DATA.fx, rows,
-    reps: [...new Set(rows.map(r=>r[1]).filter(Boolean))].sort(),
-    clientes: [...new Set(rows.map(r=>r[4]))].sort(),
-    fonte: fileName
-  };
-}
 /* A planilha de custos tem uma aba TABELA com ID LIMPO + as colunas de
    cada fonte (COGS1, COGS2, LANDED1, LANDED2). Reconhecida pelo cabecalho,
    entra pelo mesmo botao de importar e vai para o banco. A planilha traz
@@ -3727,58 +2532,6 @@ async function importarCustos(cells, fileName){
   } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
   return true;
 }
-el('btnImport').onclick = () => el('fFile').click();
-el('fFile').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  const btn = el('btnImport'); btn.disabled = true;
-  try{
-    const files = await unzip(new Uint8Array(await f.arrayBuffer()));
-    const wb = td(files['xl/workbook.xml'] || new Uint8Array());
-    const rels = td(files['xl/_rels/workbook.xml.rels'] || new Uint8Array());
-    const shared = files['xl/sharedStrings.xml'] ? sharedStrings(td(files['xl/sharedStrings.xml'])) : [];
-    /* atributos podem vir em qualquer ordem, e o Target pode ser absoluto:
-       le cada tag inteira e extrai os atributos um a um */
-    const attr = (tag, name) => {
-      const m = tag.match(new RegExp('\\b'+name+'="([^"]*)"'));
-      return m ? unesc(m[1]) : null;
-    };
-    const sheets = (wb.match(/<sheet\b[^>]*\/?>/g) || [])
-      .map(tag=>({name:attr(tag,'name'), rid:attr(tag,'r:id') || attr(tag,'id')}))
-      .filter(x=>x.name);
-    const relMap = {};
-    (rels.match(/<Relationship\b[^>]*\/?>/g) || []).forEach(tag=>{
-      const id = attr(tag,'Id'), tg = attr(tag,'Target');
-      if (id && tg) relMap[id] = tg;
-    });
-    const resolve = tg => {
-      if (!tg) return null;
-      const c = tg.replace(/^\//,'').replace(/^\.\//,'');
-      for (const cand of [c, 'xl/'+c, c.replace(/^xl\//,'')])
-        if (files[cand]) return cand;
-      return null;
-    };
-    /* planilha de custos? entra por aqui e nao mexe nos dados de venda */
-    const cst = sheets.find(x=>norm(x.name)==='tabela');
-    const cstPath = cst && resolve(relMap[cst.rid]);
-    if (cstPath && await importarCustos(sheetRows(td(files[cstPath]), shared), f.name)) return;
-    const pick = sheets.find(x=>norm(x.name)==='base') || sheets[0];
-    /* ultimo recurso: a primeira planilha que existir no pacote */
-    const path = (pick && resolve(relMap[pick.rid]))
-      || Object.keys(files).filter(k=>/^xl\/worksheets\/sheet\d*\.xml$/.test(k)).sort()[0];
-    if (!path) throw new Error(t().impNoBase);
-    const nd = buildData(sheetRows(td(files[path]), shared), f.name);
-    boot(nd); afterBoot();
-    S.reps.clear(); S.ufs.clear(); S.anos.clear(); S.meses.clear();
-    S.q = ''; el('fQ').value = '';
-    S.tab = 'all'; S.sort = 'tot'; S.dir = -1;
-    MSREP.fill(); MSUF.fill(); MSANO.fill(); MSMES.fill();
-    applyLang(); render();
-    if (podeEditar()) el('btnSave').hidden = false;
-    toast(t().impOk(nd.rows.length, f.name) + (MISSING.length ? t().impOpc(MISSING.join(', ')) : ''));
-  } catch(err){
-    toast(t().impErr + (err && err.message ? err.message : err), true);
-  } finally { btn.disabled = false; e.target.value = ''; }
-};
 
 
 
@@ -3827,24 +2580,6 @@ async function sbRpc(fn, body){
   }
   return d;
 }
-function dataFromDb(rows, imp){
-  const R2 = rows.map(r=>[r[0], r[1]||'', r[2]||'', r[3], r[4],
-    +r[5]||0, +r[6]||0, r[7]||'', r[8]||null, +r[9]||0,
-    (r[10]===null||r[10]===undefined) ? null : +r[10],
-    (r[11]===null||r[11]===undefined) ? null : +r[11],
-    normUf(r[12]), r[13]||'']);
-  const meses = MO_ALL.filter(m=>R2.some(x=>x[0]===m));
-  return {
-    meses,
-    atual: (imp.mes_atual && meses.indexOf(imp.mes_atual) >= 0) ? imp.mes_atual : meses[meses.length-1],
-    ano: imp.ano || new Date().getFullYear(),
-    fx: +imp.fx || 5.1,
-    rows: R2,
-    reps: [...new Set(R2.map(r=>r[1]).filter(Boolean))].sort(),
-    clientes: [...new Set(R2.map(r=>r[4]))].sort(),
-    fonte: (imp.arquivo || 'Supabase') + ' · banco'
-  };
-}
 async function sbLoadData(){
   const d = await sbRpc('wgi_painel_dados', {});
   METAS = (d && d.metas) || {};
@@ -3892,149 +2627,15 @@ async function sbLoadData(){
     /* base antiga vinha com itens em "auto": todos passam a ter fonte propria */
     garantirFontes();
   }
-  if (!d || d.vazio || !d.rows || !d.rows.length) return null;
-  return dataFromDb(d.rows, d.imp || {});
-}
-/* metas do ano em foco (o ano selecionado no filtro, ou o ano dos dados) */
-function metaAno(){
-  const a = S.anos.size ? [...S.anos].sort().pop() : String(DATA.ano);
-  const m = METAS[a] || METAS[String(DATA.ano)] || null;
-  if (!m) return null;
-  return {ano:a, eq:+m.equilibrio||0, ano_:+m.anual||0,
-          mes: m.mensais || {}, tri: m.trimestrais || {}};
-}
-const TRIS = ['T1','T2','T3','T4'];
-const triLab = q => (S.lang==='en' ? 'Q' : 'T') + q.slice(1);
-const triDoMes = m => 'T' + (Math.floor(MO_ALL.indexOf(m)/3) + 1);
-const temMeta = MT => !!MT && (MT.eq > 0 || MT.ano_ > 0
-  || MO_ALL.some(m=>+MT.mes[m] > 0) || TRIS.some(q=>+MT.tri[q] > 0));
-async function sbSave(){
-  const d = await sbRpc('wgi_painel_salvar', {
-    p_senha: null, p_arquivo: DATA.fonte, p_fx: DATA.fx,
-    p_mes_atual: DATA.atual, p_ano: DATA.ano, p_linhas: DATA.rows});
-  return (d && d.linhas) || DATA.rows.length;
+  return !!(d && d.custos && d.custos.itens);
 }
 /* aplica o nível de acesso na interface — o banco confere de novo, sempre */
 function applyRole(){
   const g = GUARD();
-  el('btnImport').hidden = SB_ON && !podeEditar();
-  el('btnAdm').hidden = !ADM;
-  el('admCard').hidden = !ADM;
   el('btnOut').hidden = !(g && g.sair);
   const nome = USUARIO && (USUARIO.nome || USUARIO.email);
   if (nome){ set('whoami', nome); el('whoami').hidden = false; }
-  if (ADM) admFill();
 }
-
-/* ================= área ADM: metas e ponto de equilíbrio ================= */
-let CUR_ANT = 'BRL';
-
-/* trocar a moeda converte o que está digitado, sem perder edição não salva */
-function admMoeda(anterior){
-  const L = t();
-  set('lAdmEq',    L.admEq    + ' · ' + sym());
-  set('lAdmAnual', L.admAnual + ' · ' + sym());
-  setH('admHint',  L.admMoeda(sym()) + ' ' + L.admHint);
-  if (!ADM || anterior === S.cur) return;
-  document.querySelectorAll('input.moeda').forEach(i=>poeCampo(i, leCampo(i)));
-}
-
-/* campos de dinheiro: mostram 30.000 / 30,000 conforme o idioma e guardam BRL */
-const moedaFmt = v => v ? nf0(v) : '';
-const moedaLe = txt => {
-  const t = String(txt||'').replace(/[^\d,.-]/g,'');
-  if (!t) return 0;
-  const v = S.lang === 'en'
-    ? parseFloat(t.replace(/,/g,''))
-    : parseFloat(t.replace(/\./g,'').replace(',','.'));
-  return isFinite(v) && v > 0 ? v : 0;
-};
-/* Cada campo carrega o valor exato em BRL no data-brl; a tela é só a
-   apresentação na moeda escolhida. Assim trocar R$/US$ não gera arredondamento. */
-function poeCampo(input, brl){
-  if (!input) return;
-  input.dataset.brl = brl || 0;
-  input.value = brl ? moedaFmt(conv(brl)) : '';
-}
-function leCampo(input){
-  if (!input) return 0;
-  return +input.dataset.brl || 0;
-}
-/* o que o usuário digitou passa a ser o novo valor em BRL */
-function sincCampo(input){
-  const v = moedaLe(input.value), base = +input.dataset.brl || 0;
-  /* se o texto na tela ainda é a apresentação do valor guardado, mantém o
-     valor exato — evita R$ 22.000 virar 22.001 ao passear por US$ */
-  if (base && moedaFmt(conv(base)) === moedaFmt(v)){ input.value = moedaFmt(conv(base)); return; }
-  poeCampo(input, S.cur === 'BRL' ? v : v * FX);
-}
-
-function admFill(){
-  const L = t();
-  const anos = [...new Set(ANOS.concat([String(DATA.ano), String(new Date().getFullYear())]))].sort();
-  const sel = el('aAno'), atual = sel.value || String(DATA.ano);
-  setH('aAno', anos.map(a=>'<option'+(a===atual?' selected':'')+'>'+a+'</option>').join(''));
-  const ano = el('aAno').value;
-  set('lAdmMeses', L.admMeses(ano));
-  set('lAdmTris',  L.admTris(ano));
-  setH('aMeses', MO_ALL.map(m=>
-    '<div class="mcamp"><label for="am_'+m+'">'+mn(m)+' <small>'+ano+'</small></label>'
-    + '<input type="text" inputmode="decimal" class="moeda" id="am_'+m+'" data-mes="'+m+'"></div>').join(''));
-  setH('aTris', TRIS.map(q=>
-    '<div class="mcamp tri"><label for="at_'+q+'">'+triLab(q)+' <small>'+L.triMeses[q]+' · '+ano+'</small></label>'
-    + '<input type="text" inputmode="decimal" class="moeda" id="at_'+q+'" data-tri="'+q+'"></div>').join(''));
-  admCarrega();
-}
-function admCarrega(){
-  const m = METAS[el('aAno').value] || {};
-  const mm = m.mensais || {}, tt = m.trimestrais || {};
-  poeCampo(el('aEq'),    +m.equilibrio || 0);
-  poeCampo(el('aAnual'), +m.anual || 0);
-  MO_ALL.forEach(k=>poeCampo(el('am_'+k), +mm[k] || 0));
-  TRIS.forEach(k=>poeCampo(el('at_'+k), +tt[k] || 0));
-}
-/* ao sair do campo, reescreve formatado */
-document.addEventListener('blur', e=>{
-  if (e.target && e.target.classList && e.target.classList.contains('moeda')) sincCampo(e.target);
-}, true);
-
-el('aAno').onchange = admFill;
-el('aCalc').onclick = () => {
-  document.querySelectorAll('input.moeda').forEach(sincCampo);
-  const mv = MO_ALL.map(m=>leCampo(el('am_'+m)));
-  TRIS.forEach((q,i)=>poeCampo(el('at_'+q), mv[i*3] + mv[i*3+1] + mv[i*3+2]));
-  poeCampo(el('aAnual'), mv.reduce((a,v)=>a+v, 0));
-  toast(t().admCalcOk);
-};
-el('aSalvar').onclick = async () => {
-  const L = t(), btn = el('aSalvar'), ano = +el('aAno').value;
-  document.querySelectorAll('input.moeda').forEach(sincCampo);
-  const mensais = {}, tris = {};
-  MO_ALL.forEach(m=>{ mensais[m] = leCampo(el('am_'+m)); });
-  TRIS.forEach(q=>{ tris[q] = leCampo(el('at_'+q)); });
-  const eq = leCampo(el('aEq')), anual = leCampo(el('aAnual'));
-  btn.disabled = true;
-  try{
-    await sbRpc('wgi_painel_salvar_metas',
-      {p_senha: null, p_ano: ano, p_equilibrio: eq, p_anual: anual,
-       p_mensais: mensais, p_trimestrais: tris});
-    METAS[String(ano)] = {equilibrio: eq, anual: anual, mensais: mensais, trimestrais: tris};
-    render();
-    const soma = MO_ALL.reduce((a,m)=>a + mensais[m], 0);
-    let msg = L.admOk(ano);
-    if (anual > 0 && soma > 0 && Math.abs(anual - soma)/anual > 0.02)
-      msg += '  ' + L.admIncoer(compact(anual), compact(soma));
-    toast(msg);
-  } catch(err){
-    toast(L.admErr + ((err && err.message) ? err.message : err), true);
-  } finally { btn.disabled = false; }
-};
-
-/* botão ADM no topo: quem entrou com a senha de gestão já chega liberado */
-el('btnAdm').onclick = () => {
-  if (ADM) el('admCard').scrollIntoView({behavior:'smooth', block:'center'});
-};
-
 /* ===== escrita de .xlsx sem biblioteca: zip "stored" + XML minimo =====
    Usado pela exportacao de vendas e pela exportacao da tabela de custos. */
 let CRCT;
@@ -4110,103 +2711,6 @@ function sheetXml(rows, widths, extra){
    de DATA.rows (os valores como vieram na planilha de origem, nao os calculados
    pelo relatorio). Exporta, edita no Excel e importa de volta sem perder nada.
    Escreve o .xlsx sem biblioteca: zip "stored" + as partes XML minimas. */
-const VEND_CAB = ['Month','Date','Rep','Order Number','WH','Status','Customer',
-  'Customer UF','Quantity (m)','Comission','Total per item (BRL Value)','Margin',
-  'Total Freight','SKU LIMPO'];
-/* DATA.rows: [mes,rep,wh,status,cliente,brl,qtd,pedido,data,com,margem,frete,uf,sku] */
-function vendaLinha(r){
-  return [r[0], r[8] || '', r[1] || '', r[7] || '', r[2] || '',
-          r[3] === 'I' ? 'Invoiced' : 'TBI', r[4] || '', r[12] || '',
-          +r[6] || 0, +r[9] || 0, +r[5] || 0,
-          (r[10] === null || r[10] === undefined) ? '' : +r[10],
-          (r[11] === null || r[11] === undefined) ? '' : +r[11],
-          r[13] || ''];
-}
-function vendasXlsx(){
-  const estilos = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-   + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-   + '<fonts count="2"><font><sz val="10"/><name val="Arial"/></font>'
-   + '<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font></fonts>'
-   + '<fills count="3"><fill><patternFill patternType="none"/></fill>'
-   + '<fill><patternFill patternType="gray125"/></fill>'
-   + '<fill><patternFill patternType="solid"><fgColor rgb="FF7C1B29"/>'
-   + '<bgColor indexed="64"/></patternFill></fill></fills>'
-   + '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
-   + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-   + '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
-   + '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"'
-   + ' applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
-   + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
-  const linhas = [VEND_CAB.map(v=>({v, s:1}))]
-    .concat((DATA.rows || []).map(vendaLinha));
-  const larg = [10,12,14,15,8,11,40,13,13,12,26,11,14,18];
-  return zipStore([
-   {name:'[Content_Types].xml', xml:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-     + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-     + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-     + '<Default Extension="xml" ContentType="application/xml"/>'
-     + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
-     + '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
-     + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
-     + '</Types>'},
-   {name:'_rels/.rels', xml:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-     + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-     + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
-     + '</Relationships>'},
-   {name:'xl/workbook.xml', xml:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-     + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
-     + 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-     + '<sheets><sheet name="BASE" sheetId="1" r:id="rId1"/></sheets></workbook>'},
-   {name:'xl/_rels/workbook.xml.rels', xml:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-     + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-     + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
-     + '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
-     + '</Relationships>'},
-   {name:'xl/styles.xml', xml:estilos},
-   {name:'xl/worksheets/sheet1.xml', xml:sheetXml(linhas, larg, {freeze:true})}
-  ]);
-}
-el('btnExport').onclick = () => {
-  const n = (DATA.rows || []).length;
-  if (!n){ toast(t().expVazio, true); return; }
-  const url = URL.createObjectURL(new Blob([vendasXlsx()],
-    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
-  const a = document.createElement('a');
-  a.href = url; a.download = 'VENDAS-WGI.xlsx';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 4000);
-  toast(t().expOk(n));
-};
-
-/* ================= salvar os dados importados ================= */
-el('btnSave').onclick = async () => {
-  const btn = el('btnSave');
-  btn.disabled = true;
-  try{
-    if (SB_ON){
-      if (!podeEditar()) throw new Error(t().soGerencia);
-      toast(t().salvando);
-      const n = await sbSave();
-      toast(t().salvoDb(n));
-      btn.hidden = true;
-    } else {
-      /* modo offline: regrava o proprio HTML com os dados embutidos */
-      const src = await (await fetch(location.href, {cache:'no-store'})).text();
-      const a = src.indexOf('/*DATA_START*/'), b = src.indexOf('/*DATA_END*/');
-      if (a < 0 || b < 0) throw new Error('markers');
-      const out = src.slice(0, a) + '/*DATA_START*/const DATA0 = '
-        + JSON.stringify(DATA) + ';' + src.slice(b);
-      const url = URL.createObjectURL(new Blob([out], {type:'text/html'}));
-      const link = document.createElement('a');
-      link.href = url; link.download = 'index.html';
-      document.body.appendChild(link); link.click(); link.remove();
-      setTimeout(()=>URL.revokeObjectURL(url), 4000);
-      toast(t().saveOk); btn.hidden = true;
-    }
-  } catch(err){
-    toast((SB_ON ? t().salvoErr : t().saveErr + ' ') + (err && err.message ? err.message : err), true);
-  } finally { btn.disabled = false; }
-};
 
 /* ================= acesso =================
    Quem cuida do login é a Central de Acesso (guard.js, carregado no <head>).
@@ -4215,8 +2719,7 @@ el('btnSave').onclick = async () => {
 function abrirPainel(){
   const g = el('gate'); if (g) g.remove();
   el('app').hidden = false;
-  MSREP.fill(); MSUF.fill(); MSANO.fill(); MSMES.fill();
-  applyLang(); render();
+  applyLang();
 }
 function gateErro(msg){
   set('gSub',''); set('gErr', msg);
@@ -4263,12 +2766,11 @@ async function arranca(){
     return;
   }
   try{
-    const d = await sbLoadData();
-    if (d){ boot(d); afterBoot(); }
+    const ok = await sbLoadData();
     applyRole();
     abrirPainel();
     cstAbrir(); // Wendell Custos: entra direto na Matriz de Custos, sem dashboard por trás
-    if (!d) toast(t().semDados, true);
+    if (!ok) toast(t().semDados, true);
   } catch(err){
     gateErro((err && err.message) ? err.message : String(err));
   }
@@ -4277,6 +2779,17 @@ el('btnOut').onclick = () => {
   const g = GUARD();
   if (g && g.sair) g.sair(); else location.reload();
 };
+el('themeBtn').onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme');
+  const dark = c ? c==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+};
+el('fLang').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if (!b || S.lang===b.dataset.v) return;
+  S.lang = b.dataset.v;
+  el('fLang').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', S.lang===x.dataset.v));
+  applyLang();
+});
 applyLang();
 arranca();
 </script>
