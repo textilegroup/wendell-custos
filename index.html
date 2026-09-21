@@ -1643,19 +1643,13 @@ function cstRender(){
   const RO = cenSoLeitura() ? ' disabled' : '', ROT = cenSoLeitura() ? ' readonly' : '';
   const L = t(), f = CUSTOS.fontes[CST_PAD] || '';
   const gd = cstGrpDe();
-  const usados = new Set(R.filter(r=>r.st==='I' && r.sku).map(r=>custoKey(r.sku)).filter(Boolean));
-  const vendidos = new Set(R.filter(r=>r.st==='I' && r.sku).map(r=>normSku(r.sku)).filter(Boolean));
-  /* SKU que aparece nas vendas e nao tem custo cadastrado: e justamente o que
-     se quer agrupar (venda "6A40PA 0100" x custo "6A40PAEA 0100"). Entra na
-     lista como linha sem valores — pode ser membro, nunca referencia. */
-  const comCusto = new Set(CST_EDIT.map(o=>normSku(o.sku)).filter(Boolean));
-  const soVenda = [], jaVi = new Set();
-  R.forEach(r=>{
-    const n = normSku(r.sku); if (!n || comCusto.has(n) || jaVi.has(n)) return;
-    jaVi.add(n);
-    soVenda.push({sku: r.sku0 || r.sku, venda:true, v:null, fixo:''});
-  });
-  soVenda.sort((a,b)=>a.sku.localeCompare(b.sku));
+  /* Sem o dashboard de vendas (R), não há mais como saber quais SKUs foram
+     vendidos nem cruzar venda-sem-custo automaticamente — o filtro "só
+     vendidos" e a lista de SKUs-só-de-venda ficam vazios, o resto da tela
+     de custos funciona normal. */
+  const usados = new Set();
+  const vendidos = new Set();
+  const soVenda = [];
   /* [item, indice em CST_EDIT] — indice -1 para o SKU so-de-venda, que nao
      existe na tabela de custos e por isso nao tem celula editavel */
   const base = CST_EDIT.map((o,i)=>[o,i]).concat(soVenda.map(o=>[o,-1]));
