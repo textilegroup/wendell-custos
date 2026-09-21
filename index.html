@@ -2159,11 +2159,9 @@ el('cstAdd').onclick = () => {
   const ins = el('cstGrid').querySelectorAll('input[data-k="sku"]');
   const last = ins[ins.length-1]; if (last){ last.focus(); last.scrollIntoView({block:'center'}); }
 };
-el('cstClose').onclick = () => { el('cstModal').hidden = true; };
-el('cstModal').addEventListener('click', e=>{ if (e.target.id === 'cstModal') el('cstModal').hidden = true; });
-document.addEventListener('keydown', e=>{
-  if (e.key === 'Escape' && !el('cstModal').hidden) el('cstModal').hidden = true;
-});
+/* Wendell Custos: a Matriz de Custos é a página inteira — não existe
+   dashboard por trás para "voltar", então nada aqui esconde #cstModal
+   (nem o Fechar, já oculto por CSS, nem clique fora, nem Esc). */
 /* Junta o que esta na tela (CST_EDIT + CST_GRUPOS) no formato do CUSTOS.
    A chave gravada e o ID como esta na tela, com espacos e caixa originais.
    Duas linhas que so diferem em espaco/caixa sao o mesmo item: fica a
@@ -2249,7 +2247,6 @@ el('cstSave').onclick = async () => {
     cstPreview();
     toast(d && d.local ? L.custoLocal
                        : L.cenSalvoEm(L.cenNome(CST_CEN), (d && d.itens) || ''));
-    el('cstModal').hidden = true;
   } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
   finally { btn.disabled = false; }
 };
