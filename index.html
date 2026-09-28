@@ -1650,6 +1650,8 @@ function cstRender(){
   const usados = new Set();
   const vendidos = new Set();
   const soVenda = [];
+  /* SKUs que existem na tabela de custos: so eles podem ser referencia de grupo */
+  const comCusto = new Set(CST_EDIT.filter(o=>o.sku).map(o=>normSku(o.sku)));
   /* [item, indice em CST_EDIT] — indice -1 para o SKU so-de-venda, que nao
      existe na tabela de custos e por isso nao tem celula editavel */
   const base = CST_EDIT.map((o,i)=>[o,i]).concat(soVenda.map(o=>[o,-1]));
