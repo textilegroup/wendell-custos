@@ -403,7 +403,13 @@ input.moeda:focus{outline:2px solid var(--wine-soft);outline-offset:1px}
   border:1px solid var(--line);border-radius:8px;background:var(--card);
   color:var(--ink-2);cursor:pointer;white-space:nowrap}
 .cst-fil button[aria-pressed="true"]{background:var(--cen);color:#fff;border-color:var(--cen)}
-.cst-grid{overflow:auto;flex:1;min-height:0}
+/* A rolagem é do wrapper (.cst-scroll), não mais do .cst-grid sozinho — assim
+   a orientação de texto ("hint") rola junto com a lista em vez de ficar
+   congelada no rodapé tomando espaço fixo da área de visualização. O
+   cabeçalho da tabela continua sticky porque isso é relativo ao ancestral
+   com scroll, não ao pai imediato. */
+.cst-scroll{overflow:auto;flex:1;min-height:0}
+.cst-grid{overflow:visible}
 table.cst{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
 table.cst th{position:sticky;top:0;z-index:2;background:var(--sunk);color:var(--ink-3);
   font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
@@ -793,8 +799,10 @@ footer{font-size:10.5px;color:var(--ink-3);text-align:center;padding:2px 0 0;lin
       <button type="button" id="cstAlerta" aria-pressed="false" hidden></button>
       <span class="cnt" id="cstCnt"></span>
     </div>
-    <div class="cst-grid" id="cstGrid"></div>
-    <p class="hint" id="cstHint"></p>
+    <div class="cst-scroll">
+      <div class="cst-grid" id="cstGrid"></div>
+      <p class="hint" id="cstHint"></p>
+    </div>
   </div>
 </div>
 </div>
