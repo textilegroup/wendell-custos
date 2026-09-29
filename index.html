@@ -896,6 +896,35 @@ function custosDoGrupo(ref, itens, grupos){
   });
   return {v, de};
 }
+/* "Applied" de cada item — exatamente o número mostrado na coluna Applied da
+   tela, calculado uma vez aqui e gravado no banco junto com o resto. Outros
+   HTMLs (ex.: a tabela de preços) leem esse valor pronto em vez de tentar
+   refazer a mesma conta (fonte escolhida + agrupamento) do lado deles — duas
+   contas iguais em lugares diferentes é exatamente o que já causou o bug do
+   "8J45PA 0100": a tabela de preços e o painel de custos escolhendo coisas
+   diferentes para o mesmo item. Cobre referência, membro de grupo e item
+   avulso — qualquer um pode ser o código real de um produto. */
+function cstCalcAplicados(itens, fixos, grupos, padrao){
+  const fontes = CUSTOS.fontes;
+  const padraoI = Math.max(0, fontes.indexOf(padrao));
+  const efetivoRef = {};
+  Object.keys(grupos).forEach(ref=>{
+    if (itens[ref]) efetivoRef[ref] = custosDoGrupo(ref, itens, grupos);
+  });
+  const refDoMembro = {};
+  Object.keys(grupos).forEach(ref=>{
+    (grupos[ref] || []).forEach(m=>{ if (m !== ref) refDoMembro[m] = ref; });
+  });
+  const aplicados = {};
+  Object.keys(itens).forEach(sku=>{
+    const ref = efetivoRef[sku] ? sku : (refDoMembro[sku] || sku);
+    const vef = efetivoRef[ref] || {v: (itens[ref] || []).map(x=>+x || 0)};
+    const fx = fixos[ref] ? fontes.indexOf(fixos[ref]) : -1;
+    const i = fx >= 0 ? fx : padraoI;
+    aplicados[sku] = cst4(vef.v[i]);
+  });
+  return aplicados;
+}
 /* memoria dos custos efetivos do CUSTOS — refeita sempre que os grupos mudam */
 let CUSTO_EF = {};
 function custoEf(ref){
@@ -2195,7 +2224,9 @@ function cstColeta(){
     const mem = (CST_GRUPOS[ref] || []).filter(m=>m && m !== ref);
     if (mem.length) grupos[ref] = mem;
   });
-  return {itens, fixos, grupos, vazio, dups};
+  const padrao = CUSTOS.fontes[CST_PAD] || CUSTOS.padrao || CUSTOS.fontes[0];
+  const aplicados = cstCalcAplicados(itens, fixos, grupos, padrao);
+  return {itens, fixos, grupos, aplicados, vazio, dups};
 }
 /* Recalculo ao vivo: passa o estado da tela para o CUSTOS e redesenha o
    dashboard. Nao grava nada no banco — quem grava e o Salvar. Enquanto houver
@@ -2230,7 +2261,7 @@ async function cstSalvarCenario(cen){
   const n = Object.keys(c.itens).length;
   if (!n) throw new Error(L.cstSemSku);
   const b = CST_BASES[cen] || (CST_BASES[cen] = cenVazio());
-  b.itens = c.itens; b.fixos = c.fixos; b.grupos = c.grupos;
+  b.itens = c.itens; b.fixos = c.fixos; b.grupos = c.grupos; b.aplicados = c.aplicados;
   b.padrao = CUSTOS.fontes[CST_PAD] || b.padrao;
   b.arquivo = b.arquivo || CUSTOS.arquivo || 'ADM';
   if (!Object.keys(b.itens_origem || {}).length) b.itens_origem = b.itens;
@@ -2238,7 +2269,7 @@ async function cstSalvarCenario(cen){
   return await sbRpc('wgi_painel_salvar_custos', {p_senha: null,
     p_arquivo: b.arquivo, p_fontes: CUSTOS.fontes, p_itens: b.itens,
     p_padrao: b.padrao, p_fixos: b.fixos, p_grupos: b.grupos,
-    p_cenario: cen, p_itens_origem: b.itens_origem});
+    p_cenario: cen, p_itens_origem: b.itens_origem, p_aplicados: b.aplicados});
 }
 el('cstSave').onclick = async () => {
   const L = t(), btn = el('cstSave');
@@ -2515,8 +2546,9 @@ async function importarCustos(cells, fileName){
       const mem = (b0.grupos[ref] || []).filter(m=>m !== ref);
       if (mem.length) gp[ref] = mem;
     });
+    const padrao = b0.padrao || CUSTOS.padrao || fontes[0];
     CST_BASES[cen] = {fontes, itens: JSON.parse(JSON.stringify(itens)), fixos: fx,
-      grupos: gp, padrao: b0.padrao || CUSTOS.padrao || fontes[0],
+      grupos: gp, padrao, aplicados: cstCalcAplicados(itens, fx, gp, padrao),
       arquivo: fileName, itens_origem: JSON.parse(JSON.stringify(itens))};
   });
   toast(t().custoOkNova(fileName, n));
@@ -2527,7 +2559,8 @@ async function importarCustos(cells, fileName){
       await sbRpc('wgi_painel_salvar_custos',
         {p_senha: null, p_arquivo: fileName, p_fontes: fontes,
          p_itens: b1.itens, p_padrao: b1.padrao, p_fixos: b1.fixos,
-         p_grupos: b1.grupos, p_cenario: cen, p_itens_origem: b1.itens_origem});
+         p_grupos: b1.grupos, p_cenario: cen, p_itens_origem: b1.itens_origem,
+         p_aplicados: b1.aplicados});
     }
     toast(t().custoSalvoNova(n));
   } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
