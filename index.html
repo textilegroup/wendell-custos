@@ -302,8 +302,9 @@ input.moeda:focus{outline:2px solid var(--wine-soft);outline-offset:1px}
    e fica sem botão de fechar, já que aqui não existe painel por trás. */
 #cstClose{display:none !important;}
 .cst-box{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  box-shadow:0 8px 40px rgba(0,0,0,.28);width:min(1120px,100%);max-height:92vh;
-  display:flex;flex-direction:column;overflow:hidden}
+  box-shadow:0 8px 40px rgba(0,0,0,.28);width:min(1120px,100%);
+  display:flex;flex-direction:column}
+/* a lista abre inteira e rola com a pagina, sem caixa de rolagem propria */
 .cst-hd{display:flex;align-items:center;gap:10px;padding:11px 14px 10px;
   border-bottom:2px solid var(--cen);flex-wrap:wrap}
 .cst-hd h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.09em;
@@ -403,12 +404,6 @@ input.moeda:focus{outline:2px solid var(--wine-soft);outline-offset:1px}
   border:1px solid var(--line);border-radius:8px;background:var(--card);
   color:var(--ink-2);cursor:pointer;white-space:nowrap}
 .cst-fil button[aria-pressed="true"]{background:var(--cen);color:#fff;border-color:var(--cen)}
-/* A rolagem é do wrapper (.cst-scroll), não mais do .cst-grid sozinho — assim
-   a orientação de texto ("hint") rola junto com a lista em vez de ficar
-   congelada no rodapé tomando espaço fixo da área de visualização. O
-   cabeçalho da tabela continua sticky porque isso é relativo ao ancestral
-   com scroll, não ao pai imediato. */
-.cst-scroll{overflow:auto;flex:1;min-height:0}
 .cst-grid{overflow:visible}
 table.cst{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
 table.cst th{position:sticky;top:0;z-index:2;background:var(--sunk);color:var(--ink-3);
@@ -471,7 +466,7 @@ table.cst td.uso i.alerta{color:var(--wine-soft);font-weight:700;cursor:help}
   padding:1px 5px;border-radius:4px;background:var(--cen);color:#fff;vertical-align:1px}
 /* ---- guia Agrupamento de itens ---- */
 .gr-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 14px;
-  border-bottom:1px solid var(--line);background:var(--sunk);position:sticky;top:0;z-index:3}
+  border-bottom:1px solid var(--line);background:var(--sunk);position:sticky;top:var(--hdr,0px);z-index:3}
 .gr-bar .msg{font-size:11px;color:var(--ink-3)}
 .gr-bar .msg b{color:var(--ink)}
 .gr-bar button{font:inherit;font-size:11px;font-weight:700;padding:5px 11px;
@@ -540,7 +535,7 @@ table.cst td.gc.sel{background:var(--chip);box-shadow:inset 2px 0 0 var(--cen);
 table.cst td.gc.vazio{color:var(--ink-3)}
 /* o cabecalho da lista para logo abaixo da barra de acoes, nao atras dela.
    A altura da barra varia com a mensagem, entao vem medida do JS. */
-table.cst.mrg th{top:var(--grbar,44px)}
+table.cst.mrg th{top:calc(var(--hdr,0px) + var(--grbar,44px))}
 table.cst tr.fixa td.rn{color:var(--cen)}
 table.cst tr.usada td.rn{background:var(--chip);color:var(--cen);font-weight:700}
 .cst-box .hint{margin:0;padding:9px 14px 12px;border-top:1px solid var(--line)}
@@ -799,10 +794,8 @@ footer{font-size:10.5px;color:var(--ink-3);text-align:center;padding:2px 0 0;lin
       <button type="button" id="cstAlerta" aria-pressed="false" hidden></button>
       <span class="cnt" id="cstCnt"></span>
     </div>
-    <div class="cst-scroll">
-      <div class="cst-grid" id="cstGrid"></div>
-      <p class="hint" id="cstHint"></p>
-    </div>
+    <div class="cst-grid" id="cstGrid"></div>
+    <p class="hint" id="cstHint"></p>
   </div>
 </div>
 </div>
@@ -895,35 +888,6 @@ function custosDoGrupo(ref, itens, grupos){
     }
   });
   return {v, de};
-}
-/* "Applied" de cada item — exatamente o número mostrado na coluna Applied da
-   tela, calculado uma vez aqui e gravado no banco junto com o resto. Outros
-   HTMLs (ex.: a tabela de preços) leem esse valor pronto em vez de tentar
-   refazer a mesma conta (fonte escolhida + agrupamento) do lado deles — duas
-   contas iguais em lugares diferentes é exatamente o que já causou o bug do
-   "8J45PA 0100": a tabela de preços e o painel de custos escolhendo coisas
-   diferentes para o mesmo item. Cobre referência, membro de grupo e item
-   avulso — qualquer um pode ser o código real de um produto. */
-function cstCalcAplicados(itens, fixos, grupos, padrao){
-  const fontes = CUSTOS.fontes;
-  const padraoI = Math.max(0, fontes.indexOf(padrao));
-  const efetivoRef = {};
-  Object.keys(grupos).forEach(ref=>{
-    if (itens[ref]) efetivoRef[ref] = custosDoGrupo(ref, itens, grupos);
-  });
-  const refDoMembro = {};
-  Object.keys(grupos).forEach(ref=>{
-    (grupos[ref] || []).forEach(m=>{ if (m !== ref) refDoMembro[m] = ref; });
-  });
-  const aplicados = {};
-  Object.keys(itens).forEach(sku=>{
-    const ref = efetivoRef[sku] ? sku : (refDoMembro[sku] || sku);
-    const vef = efetivoRef[ref] || {v: (itens[ref] || []).map(x=>+x || 0)};
-    const fx = fixos[ref] ? fontes.indexOf(fixos[ref]) : -1;
-    const i = fx >= 0 ? fx : padraoI;
-    aplicados[sku] = cst4(vef.v[i]);
-  });
-  return aplicados;
 }
 /* memoria dos custos efetivos do CUSTOS — refeita sempre que os grupos mudam */
 let CUSTO_EF = {};
@@ -1672,6 +1636,12 @@ function cstGuias(){
    a direita, em que grupo ele esta. Item que virou membro de um grupo continua
    na lista — antes ele sumia — em segundo plano, porque quem manda no custo do
    grupo e a referencia. */
+/* a pagina rola inteira: barra e cabecalho da tabela grudam logo abaixo do topo fixo */
+function cstHdr(){
+  const h = document.querySelector('header');
+  el('cstModal').style.setProperty('--hdr', (h && h.offsetParent ? h.offsetHeight : 0) + 'px');
+}
+window.addEventListener('resize', ()=>{ if (!el('cstModal').hidden) cstHdr(); });
 function cstRender(){
   cstGuias();
   cstBotoesTopo();
@@ -1827,6 +1797,7 @@ function cstRender(){
      cabecalho grudento onde ele deve parar */
   const bar = el('cstGrid').querySelector('.gr-bar');
   el('cstGrid').style.setProperty('--grbar', (bar ? bar.offsetHeight : 44) + 'px');
+  cstHdr();
   const nfx = CST_EDIT.filter(o=>o.fixo).length;
   setH('cstHint', L.cstHint(f) + (nfx ? ' <b>· '+esc(L.cstFixos(nfx))+'</b>' : '')
     + (falta.size ? ' <b class="av">· '+esc(L.cstAlertaHint(falta.size))+'</b>' : ''));
@@ -2224,9 +2195,7 @@ function cstColeta(){
     const mem = (CST_GRUPOS[ref] || []).filter(m=>m && m !== ref);
     if (mem.length) grupos[ref] = mem;
   });
-  const padrao = CUSTOS.fontes[CST_PAD] || CUSTOS.padrao || CUSTOS.fontes[0];
-  const aplicados = cstCalcAplicados(itens, fixos, grupos, padrao);
-  return {itens, fixos, grupos, aplicados, vazio, dups};
+  return {itens, fixos, grupos, vazio, dups};
 }
 /* Recalculo ao vivo: passa o estado da tela para o CUSTOS e redesenha o
    dashboard. Nao grava nada no banco — quem grava e o Salvar. Enquanto houver
@@ -2261,7 +2230,7 @@ async function cstSalvarCenario(cen){
   const n = Object.keys(c.itens).length;
   if (!n) throw new Error(L.cstSemSku);
   const b = CST_BASES[cen] || (CST_BASES[cen] = cenVazio());
-  b.itens = c.itens; b.fixos = c.fixos; b.grupos = c.grupos; b.aplicados = c.aplicados;
+  b.itens = c.itens; b.fixos = c.fixos; b.grupos = c.grupos;
   b.padrao = CUSTOS.fontes[CST_PAD] || b.padrao;
   b.arquivo = b.arquivo || CUSTOS.arquivo || 'ADM';
   if (!Object.keys(b.itens_origem || {}).length) b.itens_origem = b.itens;
@@ -2269,7 +2238,7 @@ async function cstSalvarCenario(cen){
   return await sbRpc('wgi_painel_salvar_custos', {p_senha: null,
     p_arquivo: b.arquivo, p_fontes: CUSTOS.fontes, p_itens: b.itens,
     p_padrao: b.padrao, p_fixos: b.fixos, p_grupos: b.grupos,
-    p_cenario: cen, p_itens_origem: b.itens_origem, p_aplicados: b.aplicados});
+    p_cenario: cen, p_itens_origem: b.itens_origem});
 }
 el('cstSave').onclick = async () => {
   const L = t(), btn = el('cstSave');
@@ -2546,9 +2515,8 @@ async function importarCustos(cells, fileName){
       const mem = (b0.grupos[ref] || []).filter(m=>m !== ref);
       if (mem.length) gp[ref] = mem;
     });
-    const padrao = b0.padrao || CUSTOS.padrao || fontes[0];
     CST_BASES[cen] = {fontes, itens: JSON.parse(JSON.stringify(itens)), fixos: fx,
-      grupos: gp, padrao, aplicados: cstCalcAplicados(itens, fx, gp, padrao),
+      grupos: gp, padrao: b0.padrao || CUSTOS.padrao || fontes[0],
       arquivo: fileName, itens_origem: JSON.parse(JSON.stringify(itens))};
   });
   toast(t().custoOkNova(fileName, n));
@@ -2559,8 +2527,7 @@ async function importarCustos(cells, fileName){
       await sbRpc('wgi_painel_salvar_custos',
         {p_senha: null, p_arquivo: fileName, p_fontes: fontes,
          p_itens: b1.itens, p_padrao: b1.padrao, p_fixos: b1.fixos,
-         p_grupos: b1.grupos, p_cenario: cen, p_itens_origem: b1.itens_origem,
-         p_aplicados: b1.aplicados});
+         p_grupos: b1.grupos, p_cenario: cen, p_itens_origem: b1.itens_origem});
     }
     toast(t().custoSalvoNova(n));
   } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
