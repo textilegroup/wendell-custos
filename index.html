@@ -448,6 +448,8 @@ table.cst td.cc.herd{position:relative}
 table.cst td.cc.herd input.num{background:repeating-linear-gradient(-45deg,
   transparent,transparent 5px,var(--line-2) 5px,var(--line-2) 6px)}
 table.cst td.uso b.herd{border-bottom:1px dotted var(--ink-3)}
+table.cst th.obs,table.cst td.obs{min-width:190px;border-left:1px solid var(--line-2)}
+table.cst td.obs input{padding:6px 8px}
 table.cst td.uso{padding:0 9px;text-align:right;white-space:nowrap;
   font-variant-numeric:tabular-nums;color:var(--ink-2)}
 table.cst td.uso b{font-weight:700;color:var(--ink)}
@@ -1014,6 +1016,7 @@ const T = {
   cstFixos:n=>n+(n>1?' itens':' item')+' com fonte fixada',
   cstUso:'Só os vendidos', cstCnt:(n,tt)=>n+' de '+tt+' itens',
   cstVazio:'Nenhum item com esse filtro.',
+  cstObs:'Obs.:', cstObsTip:'Motivo do custo especial',
   cstHint:f=>'As quatro fontes ficam lado a lado, e o <b>botão de seleção marcado na linha</b> manda no cálculo: '
     +'o item usa sempre a fonte marcada nele, destacada na própria coluna. O botão <b>todas</b> acima de cada '
     +'fonte aplica aquela fonte a todos os itens da lista — depois é só trocar item a item quem for exceção. '
@@ -1259,6 +1262,7 @@ const T = {
   cstFixos:n=>n+' item'+(n>1?'s':'')+' pinned to a source',
   cstUso:'Sold only', cstCnt:(n,tt)=>n+' of '+tt+' items',
   cstVazio:'No item matches this filter.',
+  cstObs:'Notes:', cstObsTip:'Reason for the special cost',
   cstHint:f=>'All four sources sit side by side, and the <b>radio ticked on the row</b> drives the calculation: '
     +'the item always uses the source ticked on it, highlighted in its own column. The <b>all</b> button above '
     +'each source applies it to every listed item — then just change the exceptions one by one. With no value in '
@@ -1509,6 +1513,18 @@ function cenVazio(){
           padrao: FONTES[0], arquivo:'', itens_origem:{}};
 }
 /* base de cada cenario, como veio do banco; o que esta na tela e o CST_EDIT */
+/* Obs. de cada item, por cenario: {cenario:{SKU:texto}}. Fica gravada nas
+   preferencias do painel (chave obs_custos), ao lado da base de custos. */
+let OBS_CUSTOS = {};
+const obsDe = (cen, sku) => {
+  const m = OBS_CUSTOS[cen] || {}, n = normSku(sku);
+  const k = Object.keys(m).find(x=>normSku(x) === n);
+  return k ? String(m[k] || '') : '';
+};
+async function obsGravar(){
+  if (!SB_ON) return;
+  await sbRpc('wgi_painel_prefs_gravar', {p_chave:'obs_custos', p_valor: OBS_CUSTOS});
+}
 let CST_BASES = {}, CST_CEN = 'relatorio_nova';   /* abre no rascunho, que e onde se trabalha */
 /* Lista de precos adotando os custos e o agrupamento de Relatorios: enquanto
    ligado, as duas bases de precos espelham as de relatorio e nao sao editaveis.
@@ -1533,6 +1549,7 @@ function cstGuarda(){
   const b = CST_BASES[CST_CEN] || (CST_BASES[CST_CEN] = cenVazio());
   b.itens = c.itens; b.fixos = c.fixos; b.grupos = c.grupos;
   b.padrao = CUSTOS.fontes[CST_PAD] || b.padrao;
+  OBS_CUSTOS[CST_CEN] = c.obs;
 }
 /* joga a base do cenario na tela */
 function cstCarrega(cen){
@@ -1543,7 +1560,8 @@ function cstCarrega(cen){
   CST_EDIT = Object.keys(b.itens).sort().map(k=>({
     sku: k, v: CUSTOS.fontes.map((f,i)=> cst4((b.itens[k]||[])[i])),
     /* sem escolha gravada, o item segue a fonte padrao do cenario */
-    fixo: (CUSTOS.fontes.indexOf((b.fixos||{})[k]) >= 0 ? b.fixos[k] : padCen)
+    fixo: (CUSTOS.fontes.indexOf((b.fixos||{})[k]) >= 0 ? b.fixos[k] : padCen),
+    obs: obsDe(src, k)
   }));
   CST_GRUPOS = {};
   Object.keys(b.grupos || {}).forEach(ref=>{
@@ -1727,6 +1745,7 @@ function cstRender(){
   setH('cstGrid', barra
     + '<table class="cst mrg"><thead><tr><th class="gck"></th><th>'+esc(L.cstItem)+'</th>'
     + cabFontes
+    + '<th class="obs" title="'+esc(L.cstObsTip)+'">'+esc(L.cstObs)+'</th>'
     + '<th class="num">'+esc(L.cstUsado)+'</th>'
     + '<th class="gtag">'+esc(L.grSituacao)+'</th></tr></thead><tbody>'
     + (vis.length ? vis.map(x=>{
@@ -1785,12 +1804,15 @@ function cstRender(){
                + ((ehRef || ehMembro) ? ' readonly title="'+esc(L.cstIdTravado)+'"' : '')
                + '>' + selo + '</div></td>')
           + CUSTOS.fontes.map(cel).join('')
+          + (i < 0 ? '<td class="obs vazio">–</td>'
+             : '<td class="obs"><input data-i="'+i+'" data-k="obs" maxlength="300"'
+               + ' value="'+esc(o.obs || '')+'" title="'+esc(o.obs || L.cstObsTip)+'"' + ROT + '></td>')
           + (i < 0 || ehMembro
              ? '<td class="uso"><i>–</i></td>'
              : '<td class="uso" data-uso="'+i+'">'+cstUsoTxt(o, ef)+'</td>')
           + '<td class="gtag">'+tag+'</td></tr>';
       }).join('')
-      : '<tr><td class="empty" colspan="'+(CUSTOS.fontes.length+4)+'"'
+      : '<tr><td class="empty" colspan="'+(CUSTOS.fontes.length+5)+'"'
         + ' style="padding:14px;color:var(--ink-3)">' + esc(L.cstVazio) + '</td></tr>')
     + '</tbody></table>');
   /* a barra de acoes muda de altura conforme a mensagem: mede e avisa o
@@ -2035,10 +2057,13 @@ async function cstAplicarAgora(btn){
     if (SB_ON){
       const d = await sbRpc('wgi_painel_aplicar_custos', {p_de: CST_CEN, p_para: alvo});
       CST_BASES[alvo] = JSON.parse(JSON.stringify(CST_BASES[CST_CEN]));
+      OBS_CUSTOS[alvo] = JSON.parse(JSON.stringify(OBS_CUSTOS[CST_CEN] || {}));
+      await obsGravar();
       toast(prec ? L.cenAplicarPrecosOk((d && d.itens) || '')
                  : L.cenAplicarOk(L.cenGrupo(alvo), (d && d.itens) || ''));
     } else {
       CST_BASES[alvo] = JSON.parse(JSON.stringify(CST_BASES[CST_CEN]));
+      OBS_CUSTOS[alvo] = JSON.parse(JSON.stringify(OBS_CUSTOS[CST_CEN] || {}));
       toast(L.custoLocal);
     }
     if (alvo === 'relatorio_atual') cenParaCUSTOS('relatorio_atual');
@@ -2134,6 +2159,7 @@ el('cstGrid').addEventListener('input', e=>{
   if (n.type === 'radio'){ o.fixo = n.value; }
   /* o ID fica como o usuario digitou; o casamento e por normSku, nao pelo texto */
   else if (n.dataset.k === 'sku') o.sku = n.value;
+  else if (n.dataset.k === 'obs'){ o.obs = n.value; n.title = n.value; cstAplicarDebounce(); return; }
   else o.v[+n.dataset.f] = cstNum(n.value);
   /* atualiza so a celula do custo aplicado: nao redesenha a lista nem
      perde a rolagem ou o campo em edicao */
@@ -2162,7 +2188,7 @@ el('cstAdd').onclick = () => {
     return; }
   /* linha nova ja nasce com a fonte padrao marcada, na guia Custos */
   CST_TAB = 'custos'; GR_SEL = [];
-  CST_EDIT.push({sku:'', v:CUSTOS.fontes.map(()=>0), fixo:CUSTOS.fontes[CST_PAD] || ''});
+  CST_EDIT.push({sku:'', v:CUSTOS.fontes.map(()=>0), fixo:CUSTOS.fontes[CST_PAD] || '', obs:''});
   CST_Q = ''; CST_USO = false;
   el('cstQ').value = ''; el('cstUso').setAttribute('aria-pressed','false');
   cstRender();
@@ -2177,7 +2203,7 @@ el('cstAdd').onclick = () => {
    Duas linhas que so diferem em espaco/caixa sao o mesmo item: fica a
    primeira. Usado tanto pelo recalculo ao vivo quanto pelo Salvar. */
 function cstColeta(){
-  const itens = {}, fixos = {}, vistos = {}, dups = [];
+  const itens = {}, fixos = {}, obs = {}, vistos = {}, dups = [];
   let vazio = false;
   CST_EDIT.forEach(o=>{
     const k = String(o.sku == null ? '' : o.sku).trim();
@@ -2187,6 +2213,8 @@ function cstColeta(){
     vistos[n] = k;
     itens[k] = o.v.map(cst4);
     if (o.fixo && CUSTOS.fontes.indexOf(o.fixo) >= 0) fixos[k] = o.fixo;
+    const ob = String(o.obs || '').trim();
+    if (ob) obs[k] = ob;
   });
   /* grupos da guia Agrupamento, limpos de item que nao existe mais */
   const grupos = {};
@@ -2195,7 +2223,7 @@ function cstColeta(){
     const mem = (CST_GRUPOS[ref] || []).filter(m=>m && m !== ref);
     if (mem.length) grupos[ref] = mem;
   });
-  return {itens, fixos, grupos, vazio, dups};
+  return {itens, fixos, grupos, obs, vazio, dups};
 }
 /* Recalculo ao vivo: passa o estado da tela para o CUSTOS e redesenha o
    dashboard. Nao grava nada no banco — quem grava e o Salvar. Enquanto houver
@@ -2234,11 +2262,14 @@ async function cstSalvarCenario(cen){
   b.padrao = CUSTOS.fontes[CST_PAD] || b.padrao;
   b.arquivo = b.arquivo || CUSTOS.arquivo || 'ADM';
   if (!Object.keys(b.itens_origem || {}).length) b.itens_origem = b.itens;
+  OBS_CUSTOS[cen] = c.obs;
   if (!SB_ON) return {itens:n, local:true};
-  return await sbRpc('wgi_painel_salvar_custos', {p_senha: null,
+  const r = await sbRpc('wgi_painel_salvar_custos', {p_senha: null,
     p_arquivo: b.arquivo, p_fontes: CUSTOS.fontes, p_itens: b.itens,
     p_padrao: b.padrao, p_fixos: b.fixos, p_grupos: b.grupos,
     p_cenario: cen, p_itens_origem: b.itens_origem});
+  await obsGravar();
+  return r;
 }
 el('cstSave').onclick = async () => {
   const L = t(), btn = el('cstSave');
@@ -2282,10 +2313,10 @@ function custosXlsx(){
    + '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"'
    + ' applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>'
    + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
-  const cab = ['ID LIMPO'].concat(CUSTOS.fontes).map(v=>({v, s:1}));
+  const cab = ['ID LIMPO'].concat(CUSTOS.fontes, ['OBS.:']).map(v=>({v, s:1}));
   const linhas = [cab].concat((CST_EDIT || []).filter(o=>o.sku)
-    .map(o=>[o.sku].concat(o.v.map(x=>+x||0))));
-  const larg = [20].concat(CUSTOS.fontes.map(()=>14));
+    .map(o=>[o.sku].concat(o.v.map(x=>+x||0), [String(o.obs || '').trim()])));
+  const larg = [20].concat(CUSTOS.fontes.map(()=>14), [45]);
   return zipStore([
    {name:'[Content_Types].xml', xml:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
      + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
@@ -2470,6 +2501,9 @@ async function importarCustos(cells, fileName){
     if (j >= 0 && col[j] < 0) col[j] = i;
   });
   if (!col.some(i=>i >= 0)) return false;
+  /* coluna OBS.: (motivo do custo especial). Sem ela, a obs. de cada item fica como estava. */
+  const iObs = head.findIndex(h=>['obs','observacao','observao','observacoes','observaes','nota','notas','note','notes','motivo'].indexOf(norm(h)) >= 0);
+  const obsPlan = {};
   const fontes = FONTES.slice();
   /* coluna que a planilha NAO traz nao zera o que ja estava gravado: fica como
      estava. E o que permite manter uma planilha antiga de quatro colunas sem
@@ -2487,6 +2521,7 @@ async function importarCustos(cells, fileName){
     vistos.add(nk);
     const velho = porChave[nk] || [];
     itens[k] = col.map((j,f)=> j >= 0 ? cst4(r[j]) : cst4(velho[f]));
+    if (iObs >= 0){ const ob = String(r[iObs] == null ? '' : r[iObs]).trim(); if (ob) obsPlan[k] = ob; }
   }
   const n = Object.keys(itens).length;
   if (!n) return false;
@@ -2515,6 +2550,12 @@ async function importarCustos(cells, fileName){
       const mem = (b0.grupos[ref] || []).filter(m=>m !== ref);
       if (mem.length) gp[ref] = mem;
     });
+    const ob = {};
+    Object.keys(itens).forEach(k=>{
+      const v = iObs >= 0 ? (obsPlan[k] || '') : obsDe(cen, k);
+      if (v) ob[k] = v;
+    });
+    OBS_CUSTOS[cen] = ob;
     CST_BASES[cen] = {fontes, itens: JSON.parse(JSON.stringify(itens)), fixos: fx,
       grupos: gp, padrao: b0.padrao || CUSTOS.padrao || fontes[0],
       arquivo: fileName, itens_origem: JSON.parse(JSON.stringify(itens))};
@@ -2529,6 +2570,7 @@ async function importarCustos(cells, fileName){
          p_itens: b1.itens, p_padrao: b1.padrao, p_fixos: b1.fixos,
          p_grupos: b1.grupos, p_cenario: cen, p_itens_origem: b1.itens_origem});
     }
+    await obsGravar();
     toast(t().custoSalvoNova(n));
   } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
   return true;
@@ -2624,6 +2666,12 @@ async function sbLoadData(){
         grupos: x.grupos || {}, padrao: x.padrao || '', arquivo: x.arquivo || '',
         itens_origem: fontesSeis(x.fontes, x.itens_origem)};
     });
+    /* obs. de cada item: esperada antes de abrir a tela, para ja vir preenchida */
+    try{
+      const pf = await sbRpc('wgi_painel_prefs_ler', {});
+      const ob = pf && pf.obs_custos;
+      OBS_CUSTOS = (ob && typeof ob === 'object' && !Array.isArray(ob)) ? ob : {};
+    } catch(e){ OBS_CUSTOS = {}; }
     S.custo = CUSTOS.fontes.indexOf(CUSTOS.padrao) >= 0 ? CUSTOS.padrao : CUSTOS.fontes[0];
     /* base antiga vinha com itens em "auto": todos passam a ter fonte propria */
     garantirFontes();
