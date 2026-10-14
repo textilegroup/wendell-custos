@@ -1084,6 +1084,17 @@ const T = {
   cenAdotado:n=>'adotando '+n+' · somente leitura',
   cenAdotadoMsg:n=>'O que aparece aqui é a base de <b>'+n+'</b>. Para editar, '
     +'desmarque <b>Adotar custos e agrupamento de '+n+'</b> ou edite pelo grupo '+n+'.',
+  cenAdotadoNovaMsg:(n,eu,apl)=>'Base de <b>'+n+'</b>, só leitura. <b>Salvar</b> grava esta base como '
+    +'<b>'+eu+' · Nova</b>; <b>'+apl+'</b>, ao lado da aba, publica para todos.',
+  cenAdotadoAtualMsg:(n,eu)=>'Base em uso de <b>'+n+'</b>, só leitura. O botão ao lado grava '
+    +'esta base direto como a base em uso de <b>'+eu+'</b>, para todos.',
+  cenPubEsp:eu=>'Publicar como Atual de '+eu,
+  cenPubEspConf:(n,eu)=>'Publicar a base de '+n+' como a base em uso de '+eu+'?\n\n'
+    +'Custos, agrupamentos e obs. de '+n+' passam a valer em '+eu+' para todos os usuários. '
+    +'A versão anterior de '+eu+' fica guardada no histórico.',
+  cenPubEspOk:(eu,q)=>'Base em uso de '+eu+' atualizada'+(q?' com '+q+' itens':'')+', valendo para todos.',
+  cenSalvarEspConf:(n,eu)=>'Gravar a base de '+n+' como '+eu+' · Nova?\n\n'
+    +'O rascunho atual de '+eu+' é substituído por ela. Nada muda para os outros usuários até você aplicar.',
   cenAdotarOk:(eu,n)=>eu+' passou a adotar os custos e o agrupamento de '+n+'.',
   cenAdotarOff:eu=>eu+' voltou a usar a base própria.',
   cenOrigem:'Retornar dados do arquivo original',
@@ -1327,6 +1338,17 @@ const T = {
     +'both bases here become read only. Its own basis stays stored in the database: '
     +'untick and it comes back untouched. Only one side can adopt the other.',
   cenAdotado:n=>'adopting '+n+' · read only',
+  cenAdotadoNovaMsg:(n,eu,apl)=>'<b>'+n+'</b> basis, read only. <b>Save</b> stores it as '
+    +'<b>'+eu+' · Draft</b>; <b>'+apl+'</b>, next to the tab, publishes it for everyone.',
+  cenAdotadoAtualMsg:(n,eu)=>'<b>'+n+'</b> live basis, read only. The button stores it '
+    +'directly as the <b>'+eu+'</b> live basis, for everyone.',
+  cenPubEsp:eu=>'Publish as '+eu+' live',
+  cenPubEspConf:(n,eu)=>'Publish the '+n+' basis as the '+eu+' live basis?\n\n'
+    +'Costs, grouping and notes from '+n+' will apply to '+eu+' for every user. '
+    +'The previous '+eu+' version stays in the history.',
+  cenPubEspOk:(eu,q)=>eu+' live basis updated'+(q?' with '+q+' items':'')+', for everyone.',
+  cenSalvarEspConf:(n,eu)=>'Store the '+n+' basis as '+eu+' · Draft?\n\n'
+    +'The current '+eu+' draft is replaced. Nothing changes for other users until you apply.',
   cenAdotadoMsg:n=>'What you see here is the <b>'+n+'</b> basis. To edit it, untick '
     +'<b>Adopt '+n+' costs and grouping</b> or edit it from the '+n+' group.',
   cenAdotarOk:(eu,n)=>eu+' now adopts the '+n+' costs and grouping.',
@@ -1542,6 +1564,9 @@ const cenFonte = c => cenEspelhado(c)
   ? cenOutro(ESPELHO) + c.slice(cenGrp(c).length) : c;
 const cenAtualObj = () => CST_BASES[cenFonte(CST_CEN)] || cenVazio();
 const cenSoLeitura = () => !cenNova(CST_CEN) || cenEspelhado(CST_CEN);
+/* adotando o outro lado, a tela nao edita, mas pode GRAVAR o que mostra como base
+   deste grupo: Salvar/Aplicar na Nova, Publicar direto na Atual */
+const cenPodeGravar = () => cenNova(CST_CEN) || cenEspelhado(CST_CEN);
 /* guarda o que esta na tela de volta na base do cenario (so em memoria) */
 function cstGuarda(){
   if (!CST_EDIT || cenSoLeitura()) return;   /* inclui o caso espelhado */
@@ -1595,7 +1620,7 @@ function cstCenBar(){
      ficam dentro dele — assim nao parecem quatro abas do mesmo conjunto */
   const grupo = g => {
     const aberto = CST_CEN === g+'_nova';
-    const nItens = Object.keys(((CST_BASES[g+'_nova']||{}).itens) || {}).length;
+    const nItens = Object.keys(((CST_BASES[cenFonte(g+'_nova')]||{}).itens) || {}).length;
     /* bloco aberto = o que contem o cenario selecionado, em qualquer das duas bases */
     const meu = CST_CEN === g+'_atual' || aberto;
     const esp = ESPELHO === g;          /* este bloco adota o do lado */
@@ -1609,7 +1634,7 @@ function cstCenBar(){
        Adotando Relatorios nao ha o que aplicar: o conteudo nem e desta base */
     /* no grupo Lista de precos o botao diz para onde vai: e ele que troca os
        custos do HTML da tabela de precos, nao so a base daqui */
-    + (aberto && !esp ? '<button type="button" class="apl'+(g==='precos'?' pub':'')+'" id="cstAplicarBt"'
+    + (aberto ? '<button type="button" class="apl'+(g==='precos'?' pub':'')+'" id="cstAplicarBt"'
                 + (nItens ? '' : ' disabled')
                 + ' title="'+esc(g==='precos' ? L.cenAplicarPrecosTip
                                               : L.cenAplicarTip(L.cenGrupo(g+'_atual')))+'">'
@@ -1624,9 +1649,14 @@ function cstCenBar(){
   /* verde = base em uso; vermelho = rascunho ainda nao aplicado */
   el('cstModal').classList.toggle('cen-nova', cenNova(CST_CEN));
   const fnt = L.cenGrupo(cenOutro(cenGrp(CST_CEN))+'_atual');
+  const eu = L.cenGrupo(CST_CEN);
   setH('cstAcoes', cenEspelhado(CST_CEN)
     ? '<span class="lida esp">'+esc(L.cenAdotado(fnt))+'</span>'
-      + '<span class="msg">'+L.cenAdotadoMsg(fnt)+'</span>'
+      + (cenNova(CST_CEN)
+         ? '<span class="msg">'+L.cenAdotadoNovaMsg(fnt, esc(eu),
+             esc(CST_CEN.slice(0,6)==='precos' ? L.cenAplicarPrecos : L.cenAplicarCurto))+'</span>'
+         : '<button type="button" class="apl" id="cstPubEsp">'+esc(L.cenPubEsp(eu))+'</button>'
+           + '<span class="msg">'+L.cenAdotadoAtualMsg(fnt, esc(eu))+'</span>')
     : cenSoLeitura()
     ? '<span class="lida">'+esc(L.cenSoLeitura)+'</span>'
       + '<span class="msg">'+esc(L.cenSoLeituraMsg(L.cenNome(cenPar(CST_CEN))))+'</span>'
@@ -1779,9 +1809,9 @@ function cstRender(){
         let tag = '';
         if (ehRef) tag = '<span class="ref">'+esc(L.grRef)+'</span> · '
           + esc(L.grComanda(mem.length))
-          + '<button type="button" data-des="'+esc(o.sku)+'">'+esc(L.grDesagrupar)+'</button>';
+          + (cenSoLeitura() ? '' : '<button type="button" data-des="'+esc(o.sku)+'">'+esc(L.grDesagrupar)+'</button>');
         else if (ehMembro) tag = '<span class="mem">→ '+esc(memDe)+'</span>'
-          + '<button type="button" data-sai="'+esc(o.sku)+'">'+esc(L.grTirar)+'</button>';
+          + (cenSoLeitura() ? '' : '<button type="button" data-sai="'+esc(o.sku)+'">'+esc(L.grTirar)+'</button>');
         else if (iSel === 0) tag = '<span class="ref">'+esc(L.grRef)+'</span>';
         else if (iSel > 0) tag = '<span class="mem">'+esc(L.grSelecionado)+'</span>';
         else if (o.venda) tag = '<span class="sv">'+esc(L.grSoVenda)+'</span>';
@@ -1991,7 +2021,7 @@ function cstBotoesTopo(){
   const mk = CST_TAB === 'markup';
   const ro = cenSoLeitura();
   /* no markup sempre da para salvar; Importar e Exportar sao de custos */
-  const b1 = el('cstSave'); if (b1) b1.hidden = mk ? false : ro;
+  const b1 = el('cstSave'); if (b1) b1.hidden = mk ? false : !cenNova(CST_CEN);
   const b2 = el('cstAdd');  if (b2) b2.hidden = mk ? false : ro;
   const b3 = el('cstImp');  if (b3) b3.hidden = mk ? true  : ro;
   const b4 = el('cstExp');  if (b4) b4.hidden = mk;
@@ -2027,6 +2057,22 @@ el('cstCen').addEventListener('click', e=>{
 el('cstAcoes').addEventListener('click', async e=>{
   const b = e.target.closest('button'); if (!b) return;
   const L = t();
+  if (b.id === 'cstPubEsp'){
+    /* adotando o outro lado na aba Atual: grava o que esta na tela direto como
+       a base em uso deste grupo */
+    const eu = L.cenGrupo(CST_CEN), n = L.cenGrupo(cenOutro(cenGrp(CST_CEN))+'_atual');
+    if (!cenEspelhado(CST_CEN) || cenNova(CST_CEN)) return;
+    if (!confirm(L.cenPubEspConf(n, eu))) return;
+    b.disabled = true;
+    try{
+      const d = await cstSalvarCenario(CST_CEN);
+      if (CST_CEN === 'relatorio_atual') cenParaCUSTOS('relatorio_atual');
+      cstRender(); cstPreview();
+      toast(d && d.local ? L.custoLocal : L.cenPubEspOk(eu, (d && d.itens) || ''));
+    } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
+    finally { b.disabled = false; }
+    return;
+  }
   if (b.id === 'cstOrigemBt'){
     const org = (cenAtualObj().itens_origem) || {};
     if (!Object.keys(org).length){ toast(L.cenSemOrigem, true); return; }
@@ -2046,7 +2092,7 @@ el('cstAcoes').addEventListener('click', async e=>{
 /* promove o rascunho aberto sobre a base em uso do mesmo par */
 async function cstAplicarAgora(btn){
   const L = t(), alvo = cenPar(CST_CEN), prec = CST_CEN.slice(0,6) === 'precos';
-  if (cenSoLeitura()) return;
+  if (!cenNova(CST_CEN)) return;
   if (!confirm(prec ? L.cenAplicarPrecosConf
                     : L.cenAplicarConf(L.cenGrupo(CST_CEN), L.cenNome(CST_CEN), L.cenNome(alvo)))) return;
   cstGuarda();
@@ -2261,6 +2307,12 @@ async function cstSalvarCenario(cen){
   b.itens = c.itens; b.fixos = c.fixos; b.grupos = c.grupos;
   b.padrao = CUSTOS.fontes[CST_PAD] || b.padrao;
   b.arquivo = b.arquivo || CUSTOS.arquivo || 'ADM';
+  if (cenEspelhado(cen)){
+    /* gravando a base adotada: arquivo e valores de origem vem junto dela */
+    const src = CST_BASES[cenFonte(cen)] || {};
+    b.arquivo = src.arquivo || b.arquivo;
+    b.itens_origem = JSON.parse(JSON.stringify(src.itens_origem || b.itens));
+  }
   if (!Object.keys(b.itens_origem || {}).length) b.itens_origem = b.itens;
   OBS_CUSTOS[cen] = c.obs;
   if (!SB_ON) return {itens:n, local:true};
@@ -2280,7 +2332,9 @@ el('cstSave').onclick = async () => {
     finally { btn.disabled = false; }
     return;
   }
-  if (cenSoLeitura()) return;
+  if (!cenNova(CST_CEN)) return;
+  if (cenEspelhado(CST_CEN) && !confirm(L.cenSalvarEspConf(
+        L.cenGrupo(cenOutro(cenGrp(CST_CEN))+'_atual'), L.cenGrupo(CST_CEN)))) return;
   btn.disabled = true;
   try{
     const d = await cstSalvarCenario(CST_CEN);
