@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>
+/* tema: claro na primeira vez; depois, o ultimo que a pessoa escolheu neste navegador */
+(function(){ var v = 'light';
+  try{ if (localStorage.getItem('wgi_custos_tema') === 'dark') v = 'dark'; }catch(e){}
+  document.documentElement.setAttribute('data-theme', v); })();
+</script>
 <script src="https://textilegroup.github.io/wendell-users/guard.js"
         data-app="dashboard" data-barra="nao"></script>
 <title>Wendell Brasil Custos</title>
@@ -829,6 +835,11 @@ const normSku = v => String(v == null ? '' : v).toUpperCase().replace(/\s+/g, ''
    Para acrescentar uma fonte, basta entrar nesta lista — tela, planilha de
    exportar/importar, banco e tabela de precos seguem daqui. */
 const FONTES = ['COGS1','COGS2','LANDED1','LANDED2','LANDED3','ESPECIAL'];
+/* Nome mostrado de cada fonte. A chave interna continua LANDED3 (e o que esta
+   gravado no banco e o que Relatorios e Lista de precos leem); na tela, no PDF
+   e na planilha ela aparece como COGS3. */
+const FONTE_NOME = {LANDED3:'COGS3'};
+const fNome = f => FONTE_NOME[f] || f;
 let CUSTOS = {fontes:FONTES.slice(), itens:{}, fixos:{},
               grupos:{}, arquivo:''};
 /* Base gravada antes (quatro fontes, ou outra ordem) passa por aqui: cada item
@@ -1015,7 +1026,7 @@ const T = {
   cstSub:(n,f)=>n+' itens · '+f,
   cstItem:'ID limpo',
   cstTodas:'todas', cstTodasTip:f=>'Usar '+f+' em todos os itens listados',
-  cstExp:'Exportar', cstImp:'Importar', cstPdf:'Exportar PDF',
+  cstExp:'Exportar .xlsx', cstImp:'Importar .xlsx', cstPdf:'Exportar PDF',
   pdfTitulo:'Tabela de custos', pdfEmpresa:'Wendell Global Interlining · Brasil',
   pdfBase:'Base', pdfArquivo:'Arquivo', pdfItens:'Itens', pdfGerado:'Gerado em', pdfPor:'por',
   pdfFiltro:'Filtro', pdfLeg:'● fonte marcada no item · * valor herdado de outro item do grupo · itens recuados seguem a referência acima',
@@ -1275,7 +1286,7 @@ const T = {
     +(+c>0 ? '; '+c+'% keeps the margin reported in the sales sheet (no value in the picked source).' : '.'),
   cstItem:'Clean ID',
   cstTodas:'all', cstTodasTip:f=>'Use '+f+' for every listed item',
-  cstExp:'Export', cstImp:'Import', cstPdf:'Export PDF',
+  cstExp:'Export .xlsx', cstImp:'Import .xlsx', cstPdf:'Export PDF',
   pdfTitulo:'Cost table', pdfEmpresa:'Wendell Global Interlining · Brazil',
   pdfBase:'Basis', pdfArquivo:'File', pdfItens:'Items', pdfGerado:'Generated', pdfPor:'by',
   pdfFiltro:'Filter', pdfLeg:'● source ticked on the item · * value taken from another item in the group · indented items follow the reference above',
@@ -1778,7 +1789,7 @@ function cstRender(){
   CST_VIS_LINHAS = vis;
   const nGrupos = Object.keys(CST_GRUPOS).length;
   set('cstSub', L.cstSubMix(CST_EDIT.length, nGrupos, Object.keys(gd).length - nGrupos,
-                            CUSTOS.arquivo || f));
+                            CUSTOS.arquivo || fNome(f)));
   set('cstCnt', L.cstCnt(vis.length, base.length));
   /* "todas" so age sobre quem de fato manda no proprio custo */
   CST_VIS = vis.filter(x=>x[1] >= 0 && !gd[normSku(x[0].sku)]).map(x=>x[1]);
@@ -1803,8 +1814,8 @@ function cstRender(){
      todos os itens listados logo acima do nome */
   const cabFontes = CUSTOS.fontes.map((x,i)=>
     '<th class="cc"><div class="cch">'
-    + '<button type="button" class="fs-all" data-f="'+i+'" title="'+esc(L.cstTodasTip(x))+'"'
-    + RO + '>' + esc(L.cstTodas)+'</button><span>'+esc(x)+'</span></div></th>').join('');
+    + '<button type="button" class="fs-all" data-f="'+i+'" title="'+esc(L.cstTodasTip(fNome(x)))+'"'
+    + RO + '>' + esc(L.cstTodas)+'</button><span>'+esc(fNome(x))+'</span></div></th>').join('');
 
   setH('cstGrid', barra
     + '<table class="cst mrg" style="--idw:'+Math.max(10, ...base.map(x=>String(x[0].sku||'').length))+'ch"><thead><tr><th class="gck"></th><th class="idc">'+esc(L.cstItem)+'</th>'
@@ -1830,7 +1841,7 @@ function cstRender(){
           return '<td class="cc'+((o.fixo===fn && !ehMembro) ? ' sel' : '')+(herd ? ' herd' : '')
           + '" data-cc="'+i+'-'+j+'"><div class="ccw">'
           + '<input type="radio" name="fs'+i+'" data-i="'+i+'"'
-          + ' title="'+esc(ehMembro ? L.cstFonteDoGrupo(memDe) : L.cstTodasTip(fn))+'"'
+          + ' title="'+esc(ehMembro ? L.cstFonteDoGrupo(memDe) : L.cstTodasTip(fNome(fn)))+'"'
           + ' value="'+esc(fn)+'"' + (o.fixo===fn ? ' checked' : '')
           + ((ehMembro || cenSoLeitura()) ? ' disabled' : '') + '>'
           + '<input class="num" data-i="'+i+'" data-k="v" data-f="'+j+'"'
@@ -1885,7 +1896,7 @@ function cstRender(){
   el('cstGrid').style.setProperty('--grbar', (bar ? bar.offsetHeight : 44) + 'px');
   cstHdr();
   const nfx = CST_EDIT.filter(o=>o.fixo).length;
-  setH('cstHint', L.cstHint(f) + (nfx ? ' <b>· '+esc(L.cstFixos(nfx))+'</b>' : '')
+  setH('cstHint', L.cstHint(fNome(f)) + (nfx ? ' <b>· '+esc(L.cstFixos(nfx))+'</b>' : '')
     + (falta.size ? ' <b class="av">· '+esc(L.cstAlertaHint(falta.size))+'</b>' : ''));
 }
 /* custo que vale para o item: exatamente a fonte escolhida nele. Sem valor
@@ -2206,14 +2217,14 @@ function cstUsoTxt(o, vef){
   if (!e.u){
     const fa = cstFalta(o, vef);
     if (fa && fa.outras.length)
-      return '<i class="alerta" title="'+esc(t().cstFaltaTip(o.fixo, fa.outras))+'">'
+      return '<i class="alerta" title="'+esc(t().cstFaltaTip(fNome(o.fixo), fa.outras.map(fNome)))+'">'
         + '– !</i>';
     return '<i>–</i>';
   }
   /* valor que veio do outro item do grupo leva um asterisco e o title diz de onde */
   return '<b'+(e.de ? ' class="herd" title="'+esc(t().cstDoGrupo(e.de))+'"' : '')+'>'
     + esc(cstTxt(e.u)) + (e.de ? '*' : '') + '</b>'
-    + '<i class="'+(e.fixo?'fx':'')+'">'+esc(e.src)+'</i>';
+    + '<i class="'+(e.fixo?'fx':'')+'">'+esc(fNome(e.src))+'</i>';
 }
 el('cstQ').addEventListener('input', e=>{ CST_Q = e.target.value; cstRender(); });
 el('cstUso').onclick = () => {
@@ -2256,7 +2267,7 @@ el('cstGrid').addEventListener('input', e=>{
       if (c) c.classList.toggle('sel', o.fixo === fn);
     });
     const nfx = CST_EDIT.filter(x=>x.fixo).length;
-    setH('cstHint', t().cstHint(CUSTOS.fontes[CST_PAD] || '')
+    setH('cstHint', t().cstHint(fNome(CUSTOS.fontes[CST_PAD] || ''))
       + (nfx ? ' <b>· '+esc(t().cstFixos(nfx))+'</b>' : ''));
     cstAplicar();          /* trocar a fonte do item recalcula na hora */
   } else {
@@ -2403,7 +2414,7 @@ function custosXlsx(){
    + '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"'
    + ' applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>'
    + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
-  const cab = ['ID LIMPO'].concat(CUSTOS.fontes, ['OBS.:']).map(v=>({v, s:1}));
+  const cab = ['ID LIMPO'].concat(CUSTOS.fontes.map(fNome), ['OBS.:']).map(v=>({v, s:1}));
   const linhas = [cab].concat((CST_EDIT || []).filter(o=>o.sku)
     .map(o=>[o.sku].concat(o.v.map(x=>+x||0), [String(o.obs || '').trim()])));
   const larg = [20].concat(CUSTOS.fontes.map(()=>14), [45]);
@@ -2535,7 +2546,7 @@ function cstPdfHtml(){
   + '<p>'+esc(L.pdfEmpresa)+'</p></div><div class="mt">'
   + meta.map(m=>'<b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span>').join('') + '</div></div>'
   + '<table><thead><tr><th class="id">'+esc(L.cstItem)+'</th>'
-  + F.map(f=>'<th class="cc">'+esc(f)+'</th>').join('')
+  + F.map(f=>'<th class="cc">'+esc(fNome(f))+'</th>').join('')
   + '<th class="obs">'+esc(L.cstObs)+'</th><th class="uso">'+esc(L.cstUsado)+'</th>'
   + '<th class="tag">'+esc(L.grSituacao)+'</th></tr></thead><tbody>'
   + (corpo || '<tr><td colspan="'+(F.length+4)+'">'+esc(L.cstVazio)+'</td></tr>')
@@ -2702,7 +2713,8 @@ async function importarCustos(cells, fileName){
   const iId = head.findIndex(h=>norm(h)==='idlimpo');
   /* uma coluna por fonte do modelo; a planilha pode trazer so algumas.
      ESPECIAL aceita tambem a grafia em ingles. */
-  const apelido = n => n === 'SPECIAL' ? 'ESPECIAL' : n;
+  /* COGS3 e o nome novo de LANDED3: aceita os dois, para planilha antiga continuar valendo */
+  const apelido = n => n === 'SPECIAL' ? 'ESPECIAL' : n === 'COGS3' ? 'LANDED3' : n;
   const col = FONTES.map(()=>-1);
   head.forEach((h,i)=>{
     const n = apelido(String(h).trim().toUpperCase().replace(/\s+/g,''));
@@ -3041,6 +3053,7 @@ el('themeBtn').onclick = () => {
   const c = document.documentElement.getAttribute('data-theme');
   const dark = c ? c==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
   document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  try{ localStorage.setItem('wgi_custos_tema', dark ? 'light' : 'dark'); }catch(e){}
 };
 el('fLang').addEventListener('click', e=>{
   const b = e.target.closest('button'); if (!b || S.lang===b.dataset.v) return;
