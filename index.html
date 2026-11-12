@@ -296,13 +296,13 @@ input.moeda:focus{outline:2px solid var(--wine-soft);outline-offset:1px}
 @media (max-width:1100px){.admgrid{grid-template-columns:1fr}.gridm{grid-template-columns:repeat(4,1fr)}}
 @media (max-width:560px){.gridm{grid-template-columns:repeat(3,1fr)}.admtop input.moeda{width:100%}}
 /* tela de custos (planilha simples) — so abre no modulo ADM */
-#cstModal{display:block;padding:18px 18px 48px;max-width:1120px;margin:0 auto}
+#cstModal{display:block;padding:18px 18px 48px;max-width:1480px;margin:0 auto}
 #cstModal[hidden]{display:none}
 /* Wendell Custos: app dedicado só à Matriz de Custos — o modal abre sozinho
    e fica sem botão de fechar, já que aqui não existe painel por trás. */
 #cstClose{display:none !important;}
 .cst-box{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  box-shadow:0 8px 40px rgba(0,0,0,.28);width:min(1120px,100%);
+  box-shadow:0 8px 40px rgba(0,0,0,.28);width:min(1480px,100%);
   display:flex;flex-direction:column}
 /* a lista abre inteira e rola com a pagina, sem caixa de rolagem propria */
 .cst-hd{display:flex;align-items:center;gap:10px;padding:11px 14px 10px;
@@ -463,6 +463,12 @@ table.cst td.uso i.alerta{color:var(--wine-soft);font-weight:700;cursor:help}
 .cst-fil #cstAlerta[aria-pressed="true"]{background:var(--wine-soft);color:#fff}
 /* selo do grupo na guia Custos: quantos itens aquela linha comanda */
 .skuw{display:flex;align-items:center;padding-right:7px}
+/* ID inteiro, sem corte: a coluna tem a largura do maior ID da lista */
+table.cst th.idc,table.cst td.idc{min-width:calc(var(--idw,12ch) + 52px);white-space:nowrap}
+/* membro de grupo: recuado logo abaixo da referencia, em tom mais claro */
+table.cst tr.gr-in .skuw{padding-left:20px;position:relative}
+table.cst tr.gr-in .skuw::before{content:"↳";position:absolute;left:8px;color:var(--ink-3);font-size:11px}
+table.cst.mrg tr.gr-in td.uso b,table.cst.mrg tr.gr-in td.gtag{color:var(--ink-3)}
 .skuw input{flex:1;min-width:0}
 .gsel{display:inline-block;margin-left:7px;font-size:8.5px;font-weight:700;letter-spacing:.04em;
   padding:1px 5px;border-radius:4px;background:var(--cen);color:#fff;vertical-align:1px}
@@ -780,6 +786,7 @@ footer{font-size:10.5px;color:var(--ink-3);text-align:center;padding:2px 0 0;lin
       <h2 id="cstTitulo"></h2><span class="sub" id="cstSub"></span>
       <span class="cst-acts">
         <input type="file" id="cstFile" accept=".xlsx,.xlsm" hidden>
+        <button type="button" class="admcalc" id="cstPdf"></button>
         <button type="button" class="admcalc" id="cstExp"></button>
         <button type="button" class="admcalc" id="cstImp"></button>
         <button type="button" class="admcalc" id="cstAdd"></button>
@@ -1008,7 +1015,10 @@ const T = {
   cstSub:(n,f)=>n+' itens · '+f,
   cstItem:'ID limpo',
   cstTodas:'todas', cstTodasTip:f=>'Usar '+f+' em todos os itens listados',
-  cstExp:'Exportar', cstImp:'Importar',
+  cstExp:'Exportar', cstImp:'Importar', cstPdf:'Exportar PDF',
+  pdfTitulo:'Tabela de custos', pdfEmpresa:'Wendell Global Interlining · Brasil',
+  pdfBase:'Base', pdfArquivo:'Arquivo', pdfItens:'Itens', pdfGerado:'Gerado em', pdfPor:'por',
+  pdfFiltro:'Filtro', pdfLeg:'● fonte marcada no item · * valor herdado de outro item do grupo · itens recuados seguem a referência acima',
   cstExpOk:n=>'Planilha de custos gerada com '+n+' itens.',
   cstImpErr:'A planilha precisa ter a coluna ID LIMPO e ao menos uma coluna COGS/LANDED.',
   cstBusca:'Filtrar item (ex.: 7FB55, 9800, WENFUSE)…',
@@ -1265,7 +1275,10 @@ const T = {
     +(+c>0 ? '; '+c+'% keeps the margin reported in the sales sheet (no value in the picked source).' : '.'),
   cstItem:'Clean ID',
   cstTodas:'all', cstTodasTip:f=>'Use '+f+' for every listed item',
-  cstExp:'Export', cstImp:'Import',
+  cstExp:'Export', cstImp:'Import', cstPdf:'Export PDF',
+  pdfTitulo:'Cost table', pdfEmpresa:'Wendell Global Interlining · Brazil',
+  pdfBase:'Basis', pdfArquivo:'File', pdfItens:'Items', pdfGerado:'Generated', pdfPor:'by',
+  pdfFiltro:'Filter', pdfLeg:'● source ticked on the item · * value taken from another item in the group · indented items follow the reference above',
   cstExpOk:n=>'Cost sheet generated with '+n+' items.',
   cstImpErr:'The sheet needs an ID LIMPO column and at least one COGS/LANDED column.',
   cstBusca:'Filter item (e.g. 7FB55, 9800, WENFUSE)…',
@@ -1447,7 +1460,7 @@ function applyLang(){
   set('gTitle',L.htitle); set('gSub', L.carregando);
   set('btnOut',L.sair);
   set('cstTitulo',L.cstTitulo);
-  set('cstAdd',L.cstAdd); set('cstSave',L.cstSalvar); set('cstClose',L.cstFechar);
+  set('cstAdd',L.cstAdd); set('cstPdf',L.cstPdf); set('cstSave',L.cstSalvar); set('cstClose',L.cstFechar);
   set('cstExp',L.cstExp); set('cstImp',L.cstImp);
   set('cstUso',L.cstUso);
   const cq = el('cstQ');
@@ -1673,7 +1686,8 @@ function cstGuias(){
   el('cstCen').hidden = mk; el('cstAcoes').hidden = mk;
   document.querySelector('.cst-fil').hidden = mk;
   if (!mk) cstCenBar();
-  setH('cstGuias', [['custos', L.cstGuiaCustos], ['markup', L.cstGuiaMarkup]].map(x=>
+  /* guia Markup retirada: fica so Custos e agrupamento */
+  setH('cstGuias', [['custos', L.cstGuiaCustos]].map(x=>
     '<button type="button" class="cst-guia" role="tab" data-t="'+x[0]+'" aria-selected="'
     + (CST_TAB===x[0]) + '">' + esc(x[1]) + '</button>').join(''));
 }
@@ -1690,6 +1704,25 @@ function cstHdr(){
   el('cstModal').style.setProperty('--hdr', (h && h.offsetParent ? h.offsetHeight : 0) + 'px');
 }
 window.addEventListener('resize', ()=>{ if (!el('cstModal').hidden) cstHdr(); });
+/* referencia em cima e, logo abaixo, os itens que ela comanda */
+let CST_VIS_LINHAS = [];
+function cstOrdena(lista, gd){
+  const por = {}; lista.forEach(x=>{ por[normSku(x[0].sku)] = x; });
+  const feito = new Set(), out = [];
+  lista.forEach(x=>{
+    if (feito.has(x)) return;
+    const n = normSku(x[0].sku), ref = gd[n];
+    /* membro cuja referencia esta na lista entra embaixo dela */
+    if (ref && normSku(ref) !== n && por[normSku(ref)]) return;
+    out.push(x); feito.add(x);
+    (CST_GRUPOS[x[0].sku] || []).forEach(m=>{
+      const y = por[normSku(m)];
+      if (y && !feito.has(y)){ out.push(y); feito.add(y); }
+    });
+  });
+  lista.forEach(x=>{ if (!feito.has(x)) out.push(x); });
+  return out;
+}
 function cstRender(){
   cstGuias();
   cstBotoesTopo();
@@ -1738,10 +1771,11 @@ function cstRender(){
     return !!r && (normSku(r).indexOf(q) >= 0
       || (CST_GRUPOS[r] || []).some(m=>normSku(m).indexOf(q) >= 0));
   };
-  const vis = base.filter(x=>
+  const vis = cstOrdena(base.filter(x=>
     (!q || casa(x[0]))
     && (!CST_USO || usados.has(x[0].sku) || vendidos.has(normSku(x[0].sku)))
-    && (!CST_ALERTA || falta.has(x[1])));
+    && (!CST_ALERTA || falta.has(x[1]))), gd);
+  CST_VIS_LINHAS = vis;
   const nGrupos = Object.keys(CST_GRUPOS).length;
   set('cstSub', L.cstSubMix(CST_EDIT.length, nGrupos, Object.keys(gd).length - nGrupos,
                             CUSTOS.arquivo || f));
@@ -1773,7 +1807,7 @@ function cstRender(){
     + RO + '>' + esc(L.cstTodas)+'</button><span>'+esc(x)+'</span></div></th>').join('');
 
   setH('cstGrid', barra
-    + '<table class="cst mrg"><thead><tr><th class="gck"></th><th>'+esc(L.cstItem)+'</th>'
+    + '<table class="cst mrg" style="--idw:'+Math.max(10, ...base.map(x=>String(x[0].sku||'').length))+'ch"><thead><tr><th class="gck"></th><th class="idc">'+esc(L.cstItem)+'</th>'
     + cabFontes
     + '<th class="obs" title="'+esc(L.cstObsTip)+'">'+esc(L.cstObs)+'</th>'
     + '<th class="num">'+esc(L.cstUsado)+'</th>'
@@ -1828,8 +1862,8 @@ function cstRender(){
           + (iSel >= 0 ? ' checked' : '')
           + ((ehMembro || cenSoLeitura()) ? ' disabled' : '') + '></td>'
           + (i < 0
-             ? '<td class="gsku">'+esc(o.sku)+'</td>'
-             : '<td><div class="skuw"><input data-i="'+i+'" data-k="sku" value="'+esc(o.sku)
+             ? '<td class="gsku idc">'+esc(o.sku)+'</td>'
+             : '<td class="idc"><div class="skuw"><input data-i="'+i+'" data-k="sku" value="'+esc(o.sku)
                + '" spellcheck="false"' + ROT
                + ((ehRef || ehMembro) ? ' readonly title="'+esc(L.cstIdTravado)+'"' : '')
                + '>' + selo + '</div></td>')
@@ -2022,7 +2056,9 @@ function cstBotoesTopo(){
   const ro = cenSoLeitura();
   /* no markup sempre da para salvar; Importar e Exportar sao de custos */
   const b1 = el('cstSave'); if (b1) b1.hidden = mk ? false : !cenNova(CST_CEN);
-  const b2 = el('cstAdd');  if (b2) b2.hidden = mk ? false : ro;
+  /* itens entram so pela planilha: sem + Linha */
+  const b2 = el('cstAdd');  if (b2) b2.hidden = true;
+  const b5 = el('cstPdf');  if (b5) b5.hidden = mk;
   const b3 = el('cstImp');  if (b3) b3.hidden = mk ? true  : ro;
   const b4 = el('cstExp');  if (b4) b4.hidden = mk;
 }
@@ -2405,6 +2441,125 @@ el('cstExp').onclick = () => {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 4000);
   toast(t().cstExpOk((CST_EDIT || []).filter(o=>o.sku).length));
+};
+
+/* ============ exportar PDF: a lista da guia Custos e agrupamento ============
+   Monta uma pagina limpa com o mesmo desenho da tela (mesma ordem, grupos
+   recuados, fonte marcada em destaque) e abre a impressao do navegador num
+   iframe escondido: "Salvar como PDF" gera o arquivo. Sai sempre no tema claro
+   e respeita o filtro que estiver aplicado na tela. */
+function cstPdfHtml(){
+  const L = t(), F = CUSTOS.fontes, gd = cstGrpDe();
+  const cen = cenNova(CST_CEN) ? '#9E2438' : '#4E7A1E';
+  const linhas = CST_VIS_LINHAS.filter(x=>x[1] >= 0);
+  const b = CST_BASES[cenFonte(CST_CEN)] || {};
+  const agora = new Date();
+  const dt = agora.toLocaleDateString(S.lang==='en' ? 'en-GB' : 'pt-BR') + ' '
+    + agora.toLocaleTimeString(S.lang==='en' ? 'en-GB' : 'pt-BR', {hour:'2-digit', minute:'2-digit'});
+  const quem = USUARIO && (USUARIO.nome || USUARIO.email);
+  const nGr = Object.keys(CST_GRUPOS).length;
+  const maxId = Math.max(10, ...linhas.map(x=>String(x[0].sku||'').length));
+  const corpo = linhas.map(x=>{
+    const o = x[0];
+    const memDe = gd[normSku(o.sku)] || '';
+    const ehMembro = !!memDe && memDe !== o.sku;
+    const mem = CST_GRUPOS[o.sku] || [];
+    const ef = cstVef(o);
+    const cel = (fn,j) => {
+      const herd = ef.de[j] && ef.de[j] !== o.sku && +ef.v[j] > 0;
+      const val = +o.v[j] > 0 ? cstTxt(o.v[j]) : (herd ? cstTxt(ef.v[j]) + '*' : '');
+      const sel = o.fixo === fn && !ehMembro;
+      return '<td class="cc'+(sel?' sel':'')+(herd && !(+o.v[j] > 0) ? ' herd' : '')+'">'
+        + '<span class="rd'+(o.fixo===fn ? ' on' : '')+'"></span><span class="v">'+esc(val)+'</span></td>';
+    };
+    const tag = mem.length ? '<span class="ref">'+esc(L.grRef)+'</span> · '+esc(L.grComanda(mem.length))
+      : ehMembro ? '<span class="mem">→ '+esc(memDe)+'</span>' : '';
+    return '<tr class="'+(ehMembro ? 'in' : mem.length ? 'rf' : '')+'">'
+      + '<td class="id">'+(ehMembro ? '<span class="ar">↳</span>' : '')+esc(o.sku)
+      + (mem.length ? ' <span class="gsel">+'+mem.length+'</span>' : '')+'</td>'
+      + F.map(cel).join('')
+      + '<td class="obs">'+esc(o.obs || '')+'</td>'
+      + '<td class="uso">'+(ehMembro ? '<i>–</i>' : cstUsoTxt(o, ef))+'</td>'
+      + '<td class="tag">'+tag+'</td></tr>';
+  }).join('');
+  const meta = [
+    [L.pdfBase, L.cenGrupo(CST_CEN)+' · '+L.cenNome(CST_CEN)
+       + (cenEspelhado(CST_CEN) ? ' ('+L.cenAdotado(L.cenGrupo(cenOutro(cenGrp(CST_CEN))+'_atual'))+')' : '')],
+    [L.pdfArquivo, b.arquivo || CUSTOS.arquivo || '—'],
+    [L.pdfItens, L.cstSubMix(CST_EDIT.length, nGr, Object.keys(gd).length - nGr, '')
+       .replace(/\s*·\s*$/, '') + (linhas.length !== CST_EDIT.length ? ' · ' + L.cstCnt(linhas.length, CST_EDIT.length) : '')],
+    [L.pdfGerado, dt + (quem ? ' · ' + L.pdfPor + ' ' + quem : '')]
+  ].concat(CST_Q ? [[L.pdfFiltro, CST_Q]] : []);
+  const titulo = 'CUSTOS-WGI ' + L.cenGrupo(CST_CEN) + ' ' + L.cenNome(CST_CEN) + ' '
+    + agora.getFullYear()+'-'+String(agora.getMonth()+1).padStart(2,'0')+'-'+String(agora.getDate()).padStart(2,'0');
+  return {titulo, html: '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(titulo)+'</title>'
+  + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap">'
+  + '<style>'
+  + '@page{size:A4 landscape;margin:10mm 9mm 12mm}'
+  + '@page{@bottom-right{content:counter(page) " / " counter(pages);font:8px Archivo,Arial,sans-serif;color:#8B858E}}'
+  + '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+  + 'body{margin:0;font-family:Archivo,Arial,sans-serif;color:#26252A;background:#fff;--cen:'+cen+'}'
+  + '.hd{display:flex;align-items:flex-end;gap:12px;padding-bottom:8px;border-bottom:2px solid #7C1B29;margin-bottom:8px}'
+  + '.lg{width:30px;height:30px;border-radius:50%;background:#7C1B29;color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700;flex:none}'
+  + '.tt h1{margin:0;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#7C1B29}'
+  + '.tt p{margin:2px 0 0;font-size:9px;color:#5A555C}'
+  + '.mt{margin-left:auto;display:grid;grid-template-columns:auto auto;gap:1px 10px;font-size:8.5px;color:#5A555C}'
+  + '.mt b{font-weight:700;color:#8B858E;text-transform:uppercase;letter-spacing:.06em;font-size:7.5px;text-align:right}'
+  + 'table{border-collapse:separate;border-spacing:0;width:100%;font-size:9px}'
+  + 'thead{display:table-header-group}tr{break-inside:avoid}'
+  + 'th{background:#F7F5F3;color:#8B858E;font-size:7.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;'
+  + 'text-align:left;padding:5px 6px;border-bottom:1px solid #E3E0DD}'
+  + 'td{padding:4px 6px;border-bottom:1px solid #EFECE9;vertical-align:middle}'
+  + 'th.cc,td.cc{border-left:1px solid #EFECE9;text-align:right;white-space:nowrap;width:62px}'
+  + 'td.id,th.id{white-space:nowrap;min-width:'+(maxId+5)+'ch}'
+  + 'td.cc .rd{display:inline-block;width:8px;height:8px;border-radius:50%;border:1px solid #B9B3BC;vertical-align:-1px;float:left;margin-top:1px}'
+  + 'td.cc .rd.on{border-color:var(--cen);background:radial-gradient(var(--cen) 0 45%,transparent 50%)}'
+  + 'td.cc.sel{background:#F6F4F1;box-shadow:inset 2px 0 0 var(--cen)}'
+  + 'td.cc.sel .v{color:var(--cen);font-weight:700}'
+  + 'td.cc.herd .v{color:#8B858E}'
+  + 'td.cc.herd{background:repeating-linear-gradient(-45deg,transparent 0 4px,#F2EFEC 4px 6px)}'
+  + 'th.obs,td.obs{border-left:1px solid #EFECE9;min-width:120px}'
+  + 'td.uso,th.uso{text-align:right;white-space:nowrap}'
+  + 'td.uso b{font-weight:700}td.uso i{font-style:normal;font-size:7px;font-weight:700;letter-spacing:.03em;margin-left:4px;color:#8B858E}'
+  + 'td.uso i.fx{color:var(--cen)}td.uso i.alerta{color:#A5303F}td.uso b.herd{border-bottom:1px dotted #8B858E}'
+  + 'th.tag{text-align:right}td.tag{text-align:right;white-space:nowrap;font-size:8px;color:#5A555C}'
+  + '.ref{color:var(--cen);font-weight:700;letter-spacing:.04em}'
+  + '.gsel{display:inline-block;margin-left:5px;font-size:7px;font-weight:700;padding:0 4px;border-radius:3px;background:var(--cen);color:#fff;vertical-align:1px}'
+  + 'tr.rf td{background:color-mix(in srgb,var(--cen) 9%,#fff)}tr.rf td.id{font-weight:700;color:var(--cen)}'
+  + 'tr.rf td.cc.sel{background:color-mix(in srgb,var(--cen) 14%,#fff)}'
+  + 'tr.in td{color:#8B858E;background:#FBFAF9}tr.in td.id{padding-left:22px;position:relative}'
+  + 'tr.in .ar{position:absolute;left:9px}tr.in td.cc .v{color:#8B858E;font-weight:400}tr.in td.uso b{color:#8B858E}'
+  + '.lgd{margin-top:7px;font-size:7.5px;color:#8B858E}'
+  + '</style></head><body>'
+  + '<div class="hd"><div class="lg">WGI</div><div class="tt"><h1>'+esc(L.pdfTitulo)+'</h1>'
+  + '<p>'+esc(L.pdfEmpresa)+'</p></div><div class="mt">'
+  + meta.map(m=>'<b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span>').join('') + '</div></div>'
+  + '<table><thead><tr><th class="id">'+esc(L.cstItem)+'</th>'
+  + F.map(f=>'<th class="cc">'+esc(f)+'</th>').join('')
+  + '<th class="obs">'+esc(L.cstObs)+'</th><th class="uso">'+esc(L.cstUsado)+'</th>'
+  + '<th class="tag">'+esc(L.grSituacao)+'</th></tr></thead><tbody>'
+  + (corpo || '<tr><td colspan="'+(F.length+4)+'">'+esc(L.cstVazio)+'</td></tr>')
+  + '</tbody></table><p class="lgd">'+esc(L.pdfLeg)+'</p></body></html>'};
+}
+el('cstPdf').onclick = () => {
+  const d = cstPdfHtml();
+  const old = document.getElementById('cstPdfFrame'); if (old) old.remove();
+  const fr = document.createElement('iframe');
+  fr.id = 'cstPdfFrame';
+  fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  document.body.appendChild(fr);
+  const doc = fr.contentWindow.document;
+  doc.open(); doc.write(d.html); doc.close();
+  /* o nome sugerido do arquivo vem do titulo da pagina */
+  const tit = document.title;
+  const imprime = async () => {
+    try{ await Promise.race([doc.fonts.ready, new Promise(r=>setTimeout(r, 1500))]); }catch(e){}
+    document.title = d.titulo;
+    fr.contentWindow.focus();
+    fr.contentWindow.print();
+    setTimeout(()=>{ document.title = tit; }, 1000);
+  };
+  if (doc.readyState === 'complete') imprime(); else fr.onload = imprime;
 };
 
 /* abre um .xlsx e devolve as celulas da aba pedida (ou da primeira) */
