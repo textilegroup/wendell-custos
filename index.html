@@ -476,6 +476,37 @@ table.cst tr.gr-in .skuw{padding-left:20px;position:relative}
 table.cst tr.gr-in .skuw::before{content:"↳";position:absolute;left:8px;color:var(--ink-3);font-size:11px}
 table.cst.mrg tr.gr-in td.uso b,table.cst.mrg tr.gr-in td.gtag{color:var(--ink-3)}
 .skuw input{flex:1;min-width:0}
+/* botao de recolher, no topo da coluna das caixinhas */
+table.cst th.gck{text-align:center;padding:4px 0}
+.recolhe{display:inline-grid;place-items:center;width:24px;height:24px;padding:0;border-radius:6px;
+  border:1.5px solid var(--cen);background:var(--card);color:var(--cen);cursor:pointer}
+.recolhe svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.recolhe:hover{background:var(--chip)}
+.recolhe.on{background:var(--cen);color:#fff}
+.gsel.bt{border:0;cursor:pointer;font-family:inherit;line-height:1.4}
+.gsel.bt:hover{filter:brightness(1.15)}
+/* foto do produto */
+table.cst th.foto,table.cst td.foto{width:46px;text-align:center;padding:2px 4px}
+.ft{display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border-radius:6px;
+  border:1.5px dashed var(--line);background:var(--card);color:var(--ink-3);cursor:pointer;overflow:hidden;vertical-align:middle}
+.ft svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ft:hover{border-color:var(--cen);color:var(--cen)}
+.ft.has{border:1px solid var(--line)}
+.ft img{width:100%;height:100%;object-fit:cover;display:block}
+.ft.no{cursor:help;border-color:transparent;opacity:.45}
+.ft.busy{opacity:.5;pointer-events:none;animation:ftp 1s infinite alternate}
+@keyframes ftp{to{opacity:.2}}
+#fotoBox{position:fixed;inset:0;z-index:80;background:rgba(20,16,20,.55);display:grid;place-items:center;padding:20px}
+#fotoBox[hidden]{display:none}
+#fotoBox .fb{background:var(--card);border-radius:12px;box-shadow:0 10px 50px rgba(0,0,0,.35);
+  max-width:min(92vw,900px);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+#fotoBox .fb-hd{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:2px solid var(--cen)}
+#fotoBox .fb-hd b{font-size:12px;letter-spacing:.06em;color:var(--cen)}
+#fotoBox .fb-hd span{margin-left:auto;display:flex;gap:6px}
+#fotoBox .fb-hd button{font:inherit;font-size:11px;font-weight:700;padding:5px 11px;border-radius:7px;
+  border:1px solid var(--line);background:var(--sunk);color:var(--ink-2);cursor:pointer}
+#fotoBox .fb-hd button.rm{color:var(--wine-soft);border-color:var(--wine-soft)}
+#fotoBox img{display:block;max-width:100%;max-height:calc(92vh - 60px);object-fit:contain;margin:auto;background:var(--sunk)}
 .gsel{display:inline-block;margin-left:7px;font-size:8.5px;font-weight:700;letter-spacing:.04em;
   padding:1px 5px;border-radius:4px;background:var(--cen);color:#fff;vertical-align:1px}
 /* ---- guia Agrupamento de itens ---- */
@@ -786,6 +817,13 @@ footer{font-size:10.5px;color:var(--ink-3);text-align:center;padding:2px 0 0;lin
 </header>
 <div id="tip" role="status" aria-live="polite"></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="fotoFile" accept="image/jpeg,image/png,image/webp" hidden>
+<div id="fotoBox" hidden><div class="fb" role="dialog" aria-modal="true">
+  <div class="fb-hd"><b id="fotoCod"></b><span>
+    <button type="button" id="fotoTroca"></button>
+    <button type="button" class="rm" id="fotoRem"></button>
+    <button type="button" id="fotoFecha"></button></span></div>
+  <img id="fotoImg" alt=""></div></div>
 <div id="cstModal" class="no-print" hidden>
   <div class="cst-box" role="dialog" aria-modal="true" aria-labelledby="cstTitulo">
     <div class="cst-hd">
@@ -1026,7 +1064,14 @@ const T = {
   cstSub:(n,f)=>n+' itens · '+f,
   cstItem:'ID limpo',
   cstTodas:'todas', cstTodasTip:f=>'Usar '+f+' em todos os itens listados',
-  cstExp:'Exportar .xlsx', cstImp:'Importar .xlsx', cstPdf:'Exportar PDF',
+  cstExp:'Exportar .xlsx', cstImp:'Importar .xlsx',
+  ftCol:'Foto', ftEnviar:c=>'Enviar foto de '+c, ftVer:c=>'Ver foto de '+c,
+  ftSemProduto:c=>'"'+c+'" não é um código de produto do catálogo (pode ser apelido de grupo): foto aqui não apareceria na tabela de preços.',
+  ftTrocar:'Trocar foto', ftRemover:'Remover foto', ftFechar:'Fechar',
+  ftRemConf:c=>'Remover a foto de '+c+'?\n\nA tabela de preços deixa de mostrar a foto deste item.',
+  ftTipo:'Envie uma imagem JPG, PNG ou WEBP.', ftGrande:'Imagem grande demais (máximo 15 MB).',
+  ftOk:c=>'Foto de '+c+' gravada. A tabela de preços já mostra.', ftRemOk:c=>'Foto de '+c+' removida.',
+  ftEnviando:'Enviando…', ftSemBanco:'Fotos só funcionam com o banco conectado.', cstPdf:'Exportar PDF',
   pdfTitulo:'Tabela de custos', pdfEmpresa:'Wendell Global Interlining · Brasil',
   pdfBase:'Base', pdfArquivo:'Arquivo', pdfItens:'Itens', pdfGerado:'Gerado em', pdfPor:'por',
   pdfFiltro:'Filtro', pdfLeg:'● fonte marcada no item · * valor herdado de outro item do grupo · itens recuados seguem a referência acima',
@@ -1036,6 +1081,9 @@ const T = {
   cstFonte:'Custo usado neste item', cstUsado:'Aplicado',
   cstFixos:n=>n+(n>1?' itens':' item')+' com fonte fixada',
   cstUso:'Só os vendidos', cstCnt:(n,tt)=>n+' de '+tt+' itens',
+  cstOcultos:n=>n+(n===1?' atribuído oculto':' atribuídos ocultos'),
+  cstOcultarAtrib:'Ocultar itens atribuídos às referências', cstMostrarAtrib:'Mostrar itens atribuídos às referências',
+  cstGrupoAbre:'Mostrar os itens deste grupo', cstGrupoFecha:'Ocultar os itens deste grupo',
   cstVazio:'Nenhum item com esse filtro.',
   cstObs:'Obs.:', cstObsTip:'Motivo do custo especial',
   cstHint:f=>'As quatro fontes ficam lado a lado, e o <b>botão de seleção marcado na linha</b> manda no cálculo: '
@@ -1286,7 +1334,14 @@ const T = {
     +(+c>0 ? '; '+c+'% keeps the margin reported in the sales sheet (no value in the picked source).' : '.'),
   cstItem:'Clean ID',
   cstTodas:'all', cstTodasTip:f=>'Use '+f+' for every listed item',
-  cstExp:'Export .xlsx', cstImp:'Import .xlsx', cstPdf:'Export PDF',
+  cstExp:'Export .xlsx', cstImp:'Import .xlsx',
+  ftCol:'Photo', ftEnviar:c=>'Upload photo for '+c, ftVer:c=>'View photo of '+c,
+  ftSemProduto:c=>'"'+c+'" is not a catalogue product code (it may be a group alias): a photo here would not show in the price list.',
+  ftTrocar:'Replace photo', ftRemover:'Remove photo', ftFechar:'Close',
+  ftRemConf:c=>'Remove the photo of '+c+'?\n\nThe price list stops showing a photo for this item.',
+  ftTipo:'Upload a JPG, PNG or WEBP image.', ftGrande:'Image too large (15 MB max).',
+  ftOk:c=>'Photo of '+c+' saved. The price list already shows it.', ftRemOk:c=>'Photo of '+c+' removed.',
+  ftEnviando:'Uploading…', ftSemBanco:'Photos only work with the database connected.', cstPdf:'Export PDF',
   pdfTitulo:'Cost table', pdfEmpresa:'Wendell Global Interlining · Brazil',
   pdfBase:'Basis', pdfArquivo:'File', pdfItens:'Items', pdfGerado:'Generated', pdfPor:'by',
   pdfFiltro:'Filter', pdfLeg:'● source ticked on the item · * value taken from another item in the group · indented items follow the reference above',
@@ -1296,6 +1351,9 @@ const T = {
   cstFonte:'Cost used for this item', cstUsado:'Applied',
   cstFixos:n=>n+' item'+(n>1?'s':'')+' pinned to a source',
   cstUso:'Sold only', cstCnt:(n,tt)=>n+' of '+tt+' items',
+  cstOcultos:n=>n+(n===1?' assigned item hidden':' assigned items hidden'),
+  cstOcultarAtrib:'Hide items assigned to references', cstMostrarAtrib:'Show items assigned to references',
+  cstGrupoAbre:'Show this group\'s items', cstGrupoFecha:'Hide this group\'s items',
   cstVazio:'No item matches this filter.',
   cstObs:'Notes:', cstObsTip:'Reason for the special cost',
   cstHint:f=>'All four sources sit side by side, and the <b>radio ticked on the row</b> drives the calculation: '
@@ -1734,6 +1792,9 @@ function cstOrdena(lista, gd){
   lista.forEach(x=>{ if (!feito.has(x)) out.push(x); });
   return out;
 }
+/* ocultar os itens atribuidos a uma referencia; lembrado neste navegador */
+let CST_RECOLHE = false, CST_ABERTOS = new Set();
+try{ CST_RECOLHE = localStorage.getItem('wgi_custos_recolhe') === '1'; }catch(e){}
 function cstRender(){
   cstGuias();
   cstBotoesTopo();
@@ -1782,15 +1843,24 @@ function cstRender(){
     return !!r && (normSku(r).indexOf(q) >= 0
       || (CST_GRUPOS[r] || []).some(m=>normSku(m).indexOf(q) >= 0));
   };
-  const vis = cstOrdena(base.filter(x=>
+  const visT = cstOrdena(base.filter(x=>
     (!q || casa(x[0]))
     && (!CST_USO || usados.has(x[0].sku) || vendidos.has(normSku(x[0].sku)))
     && (!CST_ALERTA || falta.has(x[1]))), gd);
+  /* recolher: some com os itens atribuidos a uma referencia, menos os do grupo
+     aberto pelo selo +n, os selecionados e quando ha busca digitada */
+  const ehMembroDe = o => { const r = gd[normSku(o.sku)]; return r && r !== o.sku ? r : ''; };
+  const vis = (!CST_RECOLHE || q) ? visT : visT.filter(x=>{
+    const r = ehMembroDe(x[0]);
+    return !r || CST_ABERTOS.has(r) || GR_SEL.indexOf(x[0].sku) >= 0;
+  });
+  const nOcultos = visT.length - vis.length;
+  const nMembros = visT.filter(x=>ehMembroDe(x[0])).length;
   CST_VIS_LINHAS = vis;
   const nGrupos = Object.keys(CST_GRUPOS).length;
   set('cstSub', L.cstSubMix(CST_EDIT.length, nGrupos, Object.keys(gd).length - nGrupos,
                             CUSTOS.arquivo || fNome(f)));
-  set('cstCnt', L.cstCnt(vis.length, base.length));
+  set('cstCnt', L.cstCnt(vis.length, base.length) + (nOcultos ? ' · ' + L.cstOcultos(nOcultos) : ''));
   /* "todas" so age sobre quem de fato manda no proprio custo */
   CST_VIS = vis.filter(x=>x[1] >= 0 && !gd[normSku(x[0].sku)]).map(x=>x[1]);
 
@@ -1818,7 +1888,16 @@ function cstRender(){
     + RO + '>' + esc(L.cstTodas)+'</button><span>'+esc(fNome(x))+'</span></div></th>').join('');
 
   setH('cstGrid', barra
-    + '<table class="cst mrg" style="--idw:'+Math.max(10, ...base.map(x=>String(x[0].sku||'').length))+'ch"><thead><tr><th class="gck"></th><th class="idc">'+esc(L.cstItem)+'</th>'
+    + '<table class="cst mrg" style="--idw:'+Math.max(10, ...base.map(x=>String(x[0].sku||'').length))+'ch"><thead><tr><th class="gck">'
+    + (nMembros || CST_RECOLHE ? '<button type="button" class="recolhe'+(CST_RECOLHE ? ' on' : '')+'" data-recolhe="1"'
+      + ' aria-pressed="'+CST_RECOLHE+'" title="'+esc(CST_RECOLHE ? L.cstMostrarAtrib : L.cstOcultarAtrib)+'"'
+      + ' aria-label="'+esc(CST_RECOLHE ? L.cstMostrarAtrib : L.cstOcultarAtrib)+'">'
+      + (CST_RECOLHE
+         ? '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4h10M3 8h10M3 12h10"/></svg>'
+         : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4h10M6 8h7M6 12h7M3 7v5"/></svg>')
+      + '</button>' : '')
+    + '</th><th class="idc">'+esc(L.cstItem)+'</th>'
+    + (fotoOn() ? '<th class="foto">'+esc(L.ftCol)+'</th>' : '')
     + cabFontes
     + '<th class="obs" title="'+esc(L.cstObsTip)+'">'+esc(L.cstObs)+'</th>'
     + '<th class="num">'+esc(L.cstUsado)+'</th>'
@@ -1867,7 +1946,11 @@ function cstRender(){
         if (usados.has(o.sku)) cls.push('usada');
         if (o.fixo && !ehMembro) cls.push('fixa');
         const selo = ehRef
-          ? '<span class="gsel" title="'+esc(L.cstGrupoTip(mem))+'">+'+mem.length+'</span>' : '';
+          ? (CST_RECOLHE && !q
+             ? '<button type="button" class="gsel bt" data-abre="'+esc(o.sku)+'" title="'
+               + esc((CST_ABERTOS.has(o.sku) ? L.cstGrupoFecha : L.cstGrupoAbre)+' · '+L.cstGrupoTip(mem))+'">+'
+               + mem.length + (CST_ABERTOS.has(o.sku) ? ' ▾' : ' ▸') + '</button>'
+             : '<span class="gsel" title="'+esc(L.cstGrupoTip(mem))+'">+'+mem.length+'</span>') : '';
         return '<tr class="'+cls.join(' ')+'">'
           + '<td class="gck"><input type="checkbox" data-g="'+esc(o.sku)+'"'
           + (iSel >= 0 ? ' checked' : '')
@@ -1878,6 +1961,7 @@ function cstRender(){
                + '" spellcheck="false"' + ROT
                + ((ehRef || ehMembro) ? ' readonly title="'+esc(L.cstIdTravado)+'"' : '')
                + '>' + selo + '</div></td>')
+          + (fotoOn() ? fotoCel(o.sku) : '')
           + CUSTOS.fontes.map(cel).join('')
           + (i < 0 ? '<td class="obs vazio">–</td>'
              : '<td class="obs"><input data-i="'+i+'" data-k="obs" maxlength="300"'
@@ -1887,7 +1971,7 @@ function cstRender(){
              : '<td class="uso" data-uso="'+i+'">'+cstUsoTxt(o, ef)+'</td>')
           + '<td class="gtag">'+tag+'</td></tr>';
       }).join('')
-      : '<tr><td class="empty" colspan="'+(CUSTOS.fontes.length+5)+'"'
+      : '<tr><td class="empty" colspan="'+(CUSTOS.fontes.length+5+(fotoOn()?1:0))+'"'
         + ' style="padding:14px;color:var(--ink-3)">' + esc(L.cstVazio) + '</td></tr>')
     + '</tbody></table>');
   /* a barra de acoes muda de altura conforme a mensagem: mede e avisa o
@@ -2001,6 +2085,18 @@ el('cstGrid').addEventListener('input', e => {
   if (cm) cm.innerHTML = ok ? '<b>' + nf4(1 / d) + '</b>' : '<i>–</i>';
 });
 el('cstGrid').addEventListener('click', e => {
+  const r = e.target.closest('button[data-recolhe]');
+  if (r){
+    CST_RECOLHE = !CST_RECOLHE; CST_ABERTOS = new Set();
+    try{ localStorage.setItem('wgi_custos_recolhe', CST_RECOLHE ? '1' : '0'); }catch(err){}
+    cstRender(); return;
+  }
+  const a = e.target.closest('button[data-abre]');
+  if (a){
+    const k = a.dataset.abre;
+    if (CST_ABERTOS.has(k)) CST_ABERTOS.delete(k); else CST_ABERTOS.add(k);
+    cstRender(); return;
+  }
   const b = e.target.closest('button[data-rm]'); if (!b) return;
   MARKUPS.splice(+b.dataset.rm, 1);
   mkRender();
@@ -2573,6 +2669,119 @@ el('cstPdf').onclick = () => {
   if (doc.readyState === 'complete') imprime(); else fr.onload = imprime;
 };
 
+/* ============ foto do produto por item ============
+   A foto mora no bucket wgi-fotos e a tabela wgi_produto_foto liga o CODIGO
+   VENDAVEL (exatamente como em wgi_products.code) a URL. A tabela de precos so
+   le. Nao entra na planilha de custos: chaveada pelo codigo, sobrevive a
+   qualquer recarga. Apelido de grupo de custo nao e codigo de produto. */
+let FOTOS = {}, PROD_CODES = null, FOTO_ALVO = '';
+const fotoSb = () => { const g = GUARD(); return g && g.sb && g.sb.storage ? g.sb : null; };
+const fotoOn = () => SB_ON && ADM && !!fotoSb();
+/* codigo do catalogo para o ID da linha; '' quando nao e produto */
+const fotoCode = sku => PROD_CODES ? (PROD_CODES[normSku(sku)] || '') : String(sku || '').trim();
+async function fotosCarrega(){
+  const sb = fotoSb(); if (!sb) return;
+  try{
+    const r = await sb.from('wgi_produto_foto').select('code,url,caminho');
+    if (!r.error){ FOTOS = {}; (r.data || []).forEach(x=>{ FOTOS[normSku(x.code)] = x; }); }
+  } catch(e){}
+  try{
+    const p = await sb.from('wgi_products').select('code');
+    if (!p.error && p.data && p.data.length){
+      PROD_CODES = {}; p.data.forEach(x=>{ if (x.code) PROD_CODES[normSku(x.code)] = x.code; });
+    }
+  } catch(e){}
+  if (!el('cstModal').hidden) cstRender();
+}
+const FT_ICO = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9.5" rx="1.5"/>'
+  + '<circle cx="6" cy="7" r="1.2"/><path d="M2.5 12l3.5-3.2 2.5 2.2 2-1.6 3 2.6"/></svg>';
+function fotoCel(sku){
+  const L = t(), code = fotoCode(sku);
+  if (!code) return '<td class="foto"><span class="ft no" title="'+esc(L.ftSemProduto(sku))+'">'+FT_ICO+'</span></td>';
+  const f = FOTOS[normSku(code)];
+  return '<td class="foto">' + (f
+    ? '<button type="button" class="ft has" data-foto="'+esc(code)+'" title="'+esc(L.ftVer(code))+'">'
+      + '<img src="'+esc(f.url)+'" alt="" loading="lazy"></button>'
+    : '<button type="button" class="ft" data-foto="'+esc(code)+'" title="'+esc(L.ftEnviar(code))+'">'+FT_ICO+'</button>')
+    + '</td>';
+}
+/* encolhe no navegador: lado maior 1200px, JPEG 0,8 (fundo branco p/ PNG transparente) */
+async function fotoEncolhe(file){
+  const url = URL.createObjectURL(file);
+  try{
+    const img = await new Promise((ok, no)=>{ const i = new Image(); i.onload = ()=>ok(i); i.onerror = no; i.src = url; });
+    const k = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise(ok=>c.toBlob(ok, 'image/jpeg', 0.8));
+  } finally { URL.revokeObjectURL(url); }
+}
+async function fotoEnviar(code, arquivo){
+  const L = t(), sb = fotoSb();
+  if (!sb){ toast(L.ftSemBanco, true); return; }
+  if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0){ toast(L.ftTipo, true); return; }
+  if (arquivo.size > 15*1024*1024){ toast(L.ftGrande, true); return; }
+  const bt = el('cstGrid').querySelector('[data-foto="'+CSS.escape(code)+'"]');
+  if (bt) bt.classList.add('busy');
+  toast(L.ftEnviando);
+  try{
+    const blob = await fotoEncolhe(arquivo);
+    const slug = code.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    const caminho = slug + '-' + Date.now() + '.jpg';      /* nome novo a cada troca: sem cache velho */
+    const up = await sb.storage.from('wgi-fotos').upload(caminho, blob, {contentType:'image/jpeg', upsert:false});
+    if (up.error) throw up.error;
+    const url = sb.storage.from('wgi-fotos').getPublicUrl(caminho).data.publicUrl;
+    const ant = await sb.from('wgi_produto_foto').select('caminho').eq('code', code).maybeSingle();
+    const anterior = ant && ant.data && ant.data.caminho;
+    const gr = await sb.from('wgi_produto_foto').upsert(
+      {code, url, caminho, atualizado_em: new Date().toISOString()}, {onConflict:'code'});
+    if (gr.error){ await sb.storage.from('wgi-fotos').remove([caminho]); throw gr.error; }
+    /* so depois que o novo esta gravado e que o antigo sai */
+    if (anterior && anterior !== caminho) await sb.storage.from('wgi-fotos').remove([anterior]);
+    FOTOS[normSku(code)] = {code, url, caminho};
+    toast(L.ftOk(code));
+    if (!el('fotoBox').hidden) fotoAbre(code);
+  } catch(err){ toast(L.impErr + (err && err.message ? err.message : err), true); }
+  finally { cstRender(); }
+}
+async function fotoRemover(code){
+  const L = t(), sb = fotoSb(); if (!sb) return;
+  if (!confirm(L.ftRemConf(code))) return;
+  try{
+    const f = FOTOS[normSku(code)] || {};
+    const d = await sb.from('wgi_produto_foto').delete().eq('code', code);
+    if (d.error) throw d.error;
+    if (f.caminho) await sb.storage.from('wgi-fotos').remove([f.caminho]);
+    delete FOTOS[normSku(code)];
+    fotoFecha(); cstRender(); toast(L.ftRemOk(code));
+  } catch(err){ toast(L.impErr + (err && err.message ? err.message : err), true); }
+}
+function fotoAbre(code){
+  const L = t(), f = FOTOS[normSku(code)]; if (!f) return;
+  FOTO_ALVO = code;
+  set('fotoCod', code); set('fotoTroca', L.ftTrocar); set('fotoRem', L.ftRemover); set('fotoFecha', L.ftFechar);
+  el('fotoImg').src = f.url; el('fotoImg').alt = code;
+  el('fotoBox').hidden = false;
+}
+function fotoFecha(){ el('fotoBox').hidden = true; el('fotoImg').removeAttribute('src'); }
+el('cstGrid').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-foto]'); if (!b) return;
+  const code = b.dataset.foto;
+  if (FOTOS[normSku(code)]) fotoAbre(code);
+  else { FOTO_ALVO = code; el('fotoFile').click(); }
+});
+el('fotoFile').onchange = e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (f && FOTO_ALVO) fotoEnviar(FOTO_ALVO, f);
+};
+el('fotoTroca').onclick = () => el('fotoFile').click();
+el('fotoRem').onclick = () => fotoRemover(FOTO_ALVO);
+el('fotoFecha').onclick = fotoFecha;
+el('fotoBox').addEventListener('click', e=>{ if (e.target.id === 'fotoBox') fotoFecha(); });
+document.addEventListener('keydown', e=>{ if (e.key === 'Escape' && !el('fotoBox').hidden) fotoFecha(); });
+
 /* abre um .xlsx e devolve as celulas da aba pedida (ou da primeira) */
 async function abasDoXlsx(f, nomePreferido){
   const files = await unzip(new Uint8Array(await f.arrayBuffer()));
@@ -3039,6 +3248,7 @@ async function arranca(){
     const ok = await sbLoadData();
     applyRole();
     abrirPainel();
+    fotosCarrega();
     cstAbrir(); // Wendell Custos: entra direto na Matriz de Custos, sem dashboard por trás
     if (!ok) toast(t().semDados, true);
   } catch(err){
