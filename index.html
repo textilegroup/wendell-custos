@@ -440,6 +440,10 @@ table.cst td.cc{padding:0}
 .cch .fs-all:hover{border-color:var(--cen);color:var(--cen)}
 .cch span{font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--ink-3);
   text-transform:none;line-height:1.1;text-align:right;padding-right:3px}
+/* cotacao USD/BRL da fonte: so leitura, vem da planilha de importacao */
+.cch small.fx{display:block;font-size:8px;font-weight:600;letter-spacing:.02em;color:var(--ink-3);
+  text-transform:none;line-height:1.1;text-align:right;padding-right:3px;white-space:nowrap;cursor:help}
+.cch small.fx b{font-weight:700;color:var(--s2);font-variant-numeric:tabular-nums}
 .ccw{display:flex;align-items:center;gap:2px;padding:0 5px 0 6px}
 .ccw input[type=radio]{width:12px;height:12px;flex:0 0 12px;margin:0;
   accent-color:var(--cen);cursor:pointer}
@@ -1065,6 +1069,7 @@ const T = {
   cstItem:'ID limpo',
   cstTodas:'todas', cstTodasTip:f=>'Usar '+f+' em todos os itens listados',
   cstExp:'Exportar .xlsx', cstImp:'Importar .xlsx',
+  fxTip:'Cotação USD/BRL usada nesta fonte. Só informa, não entra em nenhuma conta. Muda pela linha USD/BRL da planilha de importação.',
   ftCol:'Foto', ftEnviar:c=>'Enviar foto de '+c, ftVer:c=>'Ver foto de '+c,
   ftSemProduto:c=>'"'+c+'" não é um código de produto do catálogo (pode ser apelido de grupo): foto aqui não apareceria na tabela de preços.',
   ftTrocar:'Trocar foto', ftRemover:'Remover foto', ftFechar:'Fechar',
@@ -1335,6 +1340,7 @@ const T = {
   cstItem:'Clean ID',
   cstTodas:'all', cstTodasTip:f=>'Use '+f+' for every listed item',
   cstExp:'Export .xlsx', cstImp:'Import .xlsx',
+  fxTip:'USD/BRL rate used for this source. Information only, it does not enter any calculation. It changes through the USD/BRL row of the import sheet.',
   ftCol:'Photo', ftEnviar:c=>'Upload photo for '+c, ftVer:c=>'View photo of '+c,
   ftSemProduto:c=>'"'+c+'" is not a catalogue product code (it may be a group alias): a photo here would not show in the price list.',
   ftTrocar:'Replace photo', ftRemover:'Remove photo', ftFechar:'Close',
@@ -1629,6 +1635,23 @@ async function obsGravar(){
   if (!SB_ON) return;
   await sbRpc('wgi_painel_prefs_gravar', {p_chave:'obs_custos', p_valor: OBS_CUSTOS});
 }
+/* Cotacao USD/BRL usada em cada COGS. So INFORMA: nao entra em conta nenhuma.
+   Nao se edita na tela — vem da linha "USD/BRL" no topo da planilha de
+   importacao. Fica nas preferencias do painel (chave cambio_custos), por
+   cenario: {cenario:{COGS1:5.516, COGS2:5.1635, LANDED3:4.9859}}. */
+const FX_FONTES = ['COGS1','COGS2','LANDED3'];
+let CAMBIO = {};
+const cambioDe = (cen, f) => { const v = +((CAMBIO[cen] || {})[f]); return isFinite(v) && v > 0 ? v : 0; };
+async function cambioGravar(){
+  if (!SB_ON) return;
+  await sbRpc('wgi_painel_prefs_gravar', {p_chave:'cambio_custos', p_valor: CAMBIO});
+}
+/* rotulo do topo da coluna: "USD/BRL 5,5160" (ou "—" sem cotacao informada) */
+function fxCab(f, cen){
+  if (FX_FONTES.indexOf(f) < 0) return '';
+  const v = cambioDe(cen, f), L = t();
+  return '<small class="fx" title="'+esc(L.fxTip)+'">USD/BRL <b>'+(v ? nf4(v) : '—')+'</b></small>';
+}
 let CST_BASES = {}, CST_CEN = 'relatorio_nova';   /* abre no rascunho, que e onde se trabalha */
 /* Lista de precos adotando os custos e o agrupamento de Relatorios: enquanto
    ligado, as duas bases de precos espelham as de relatorio e nao sao editaveis.
@@ -1885,7 +1908,8 @@ function cstRender(){
   const cabFontes = CUSTOS.fontes.map((x,i)=>
     '<th class="cc"><div class="cch">'
     + '<button type="button" class="fs-all" data-f="'+i+'" title="'+esc(L.cstTodasTip(fNome(x)))+'"'
-    + RO + '>' + esc(L.cstTodas)+'</button><span>'+esc(fNome(x))+'</span></div></th>').join('');
+    + RO + '>' + esc(L.cstTodas)+'</button><span>'+esc(fNome(x))+'</span>'
+    + fxCab(x, cenFonte(CST_CEN)) + '</div></th>').join('');
 
   setH('cstGrid', barra
     + '<table class="cst mrg" style="--idw:'+Math.max(10, ...base.map(x=>String(x[0].sku||'').length))+'ch"><thead><tr><th class="gck">'
@@ -2247,12 +2271,15 @@ async function cstAplicarAgora(btn){
       const d = await sbRpc('wgi_painel_aplicar_custos', {p_de: CST_CEN, p_para: alvo});
       CST_BASES[alvo] = JSON.parse(JSON.stringify(CST_BASES[CST_CEN]));
       OBS_CUSTOS[alvo] = JSON.parse(JSON.stringify(OBS_CUSTOS[CST_CEN] || {}));
+      CAMBIO[alvo] = JSON.parse(JSON.stringify(CAMBIO[CST_CEN] || {}));
       await obsGravar();
+      await cambioGravar();
       toast(prec ? L.cenAplicarPrecosOk((d && d.itens) || '')
                  : L.cenAplicarOk(L.cenGrupo(alvo), (d && d.itens) || ''));
     } else {
       CST_BASES[alvo] = JSON.parse(JSON.stringify(CST_BASES[CST_CEN]));
       OBS_CUSTOS[alvo] = JSON.parse(JSON.stringify(OBS_CUSTOS[CST_CEN] || {}));
+      CAMBIO[alvo] = JSON.parse(JSON.stringify(CAMBIO[CST_CEN] || {}));
       toast(L.custoLocal);
     }
     if (alvo === 'relatorio_atual') cenParaCUSTOS('relatorio_atual');
@@ -2458,12 +2485,15 @@ async function cstSalvarCenario(cen){
   }
   if (!Object.keys(b.itens_origem || {}).length) b.itens_origem = b.itens;
   OBS_CUSTOS[cen] = c.obs;
+  /* gravando a base adotada do outro lado, a cotacao dela vem junto */
+  if (cenEspelhado(cen)) CAMBIO[cen] = JSON.parse(JSON.stringify(CAMBIO[cenFonte(cen)] || {}));
   if (!SB_ON) return {itens:n, local:true};
   const r = await sbRpc('wgi_painel_salvar_custos', {p_senha: null,
     p_arquivo: b.arquivo, p_fontes: CUSTOS.fontes, p_itens: b.itens,
     p_padrao: b.padrao, p_fixos: b.fixos, p_grupos: b.grupos,
     p_cenario: cen, p_itens_origem: b.itens_origem});
   await obsGravar();
+  if (cenEspelhado(cen)) await cambioGravar();
   return r;
 }
 el('cstSave').onclick = async () => {
@@ -2498,20 +2528,34 @@ el('cstSave').onclick = async () => {
 function custosXlsx(){
   const estilos = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
    + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-   + '<fonts count="2"><font><sz val="10"/><name val="Arial"/></font>'
-   + '<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font></fonts>'
-   + '<fills count="3"><fill><patternFill patternType="none"/></fill>'
+   + '<numFmts count="1"><numFmt numFmtId="164" formatCode="0.0000"/></numFmts>'
+   + '<fonts count="3"><font><sz val="10"/><name val="Arial"/></font>'
+   + '<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font>'
+   + '<font><b/><sz val="10"/><color rgb="FFB8801F"/><name val="Arial"/></font></fonts>'
+   + '<fills count="4"><fill><patternFill patternType="none"/></fill>'
    + '<fill><patternFill patternType="gray125"/></fill>'
    + '<fill><patternFill patternType="solid"><fgColor rgb="FF7C1B29"/>'
+   + '<bgColor indexed="64"/></patternFill></fill>'
+   + '<fill><patternFill patternType="solid"><fgColor rgb="FFFBF3E4"/>'
    + '<bgColor indexed="64"/></patternFill></fill></fills>'
    + '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
    + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-   + '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+   + '<cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
    + '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"'
-   + ' applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>'
+   + ' applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'
+   /* 2: cotacao USD/BRL, 4 casas, fundo creme; 3: rotulo USD/BRL */
+   + '<xf numFmtId="164" fontId="2" fillId="3" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1"/>'
+   + '<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs>'
    + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
   const cab = ['ID LIMPO'].concat(CUSTOS.fontes.map(fNome), ['OBS.:']).map(v=>({v, s:1}));
-  const linhas = [cab].concat((CST_EDIT || []).filter(o=>o.sku)
+  /* linha 1: cotacao USD/BRL de cada COGS, logo acima do nome da coluna.
+     E so por aqui (importando a planilha) que a cotacao muda. */
+  const cenFx = cenFonte(CST_CEN);
+  const fx = [{v:'USD/BRL', s:3}].concat(CUSTOS.fontes.map(f=>{
+    if (FX_FONTES.indexOf(f) < 0) return '';
+    const v = cambioDe(cenFx, f); return v ? {v, s:2} : {v:'', s:2};
+  }), ['']);
+  const linhas = [fx, cab].concat((CST_EDIT || []).filter(o=>o.sku)
     .map(o=>[o.sku].concat(o.v.map(x=>+x||0), [String(o.obs || '').trim()])));
   const larg = [20].concat(CUSTOS.fontes.map(()=>14), [45]);
   return zipStore([
@@ -2537,7 +2581,7 @@ function custosXlsx(){
      + '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
      + '</Relationships>'},
    {name:'xl/styles.xml', xml:estilos},
-   {name:'xl/worksheets/sheet1.xml', xml:sheetXml(linhas, larg, {freeze:true})}
+   {name:'xl/worksheets/sheet1.xml', xml:sheetXml(linhas, larg, {freeze:2, alto:1})}
   ]);
 }
 el('cstExp').onclick = () => {
@@ -2617,6 +2661,7 @@ function cstPdfHtml(){
   + 'th{background:#F7F5F3;color:#8B858E;font-size:7.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;'
   + 'text-align:left;padding:5px 6px;border-bottom:1px solid #E3E0DD}'
   + 'td{padding:4px 6px;border-bottom:1px solid #EFECE9;vertical-align:middle}'
+  + 'th.cc .fx{font-size:6.5px;letter-spacing:.02em;color:#B8801F;text-transform:none}'
   + 'th.cc,td.cc{border-left:1px solid #EFECE9;text-align:right;white-space:nowrap;width:62px}'
   + 'td.id,th.id{white-space:nowrap;min-width:'+(maxId+5)+'ch}'
   + 'td.cc .rd{display:inline-block;width:8px;height:8px;border-radius:50%;border:1px solid #B9B3BC;vertical-align:-1px;float:left;margin-top:1px}'
@@ -2642,7 +2687,10 @@ function cstPdfHtml(){
   + '<p>'+esc(L.pdfEmpresa)+'</p></div><div class="mt">'
   + meta.map(m=>'<b>'+esc(m[0])+'</b><span>'+esc(m[1])+'</span>').join('') + '</div></div>'
   + '<table><thead><tr><th class="id">'+esc(L.cstItem)+'</th>'
-  + F.map(f=>'<th class="cc">'+esc(fNome(f))+'</th>').join('')
+  + F.map(f=>{ const v = FX_FONTES.indexOf(f) >= 0 ? cambioDe(cenFonte(CST_CEN), f) : 0;
+      return '<th class="cc">'+esc(fNome(f))
+        + (FX_FONTES.indexOf(f) >= 0 ? '<br><span class="fx">USD/BRL '+(v ? nf4(v) : '—')+'</span>' : '')
+        + '</th>'; }).join('')
   + '<th class="obs">'+esc(L.cstObs)+'</th><th class="uso">'+esc(L.cstUsado)+'</th>'
   + '<th class="tag">'+esc(L.grSituacao)+'</th></tr></thead><tbody>'
   + (corpo || '<tr><td colspan="'+(F.length+4)+'">'+esc(L.cstVazio)+'</td></tr>')
@@ -2917,8 +2965,14 @@ const norm = s => String(s??'').toLowerCase().replace(/[^a-z0-9]/g,'');
    na fonte padrao (garantirFontes). Coluna FONTE, se vier de um arquivo
    antigo, e simplesmente ignorada. */
 async function importarCustos(cells, fileName){
-  const head = (cells[0] || []).map(x=>String(x==null?'':x).trim());
-  if (head.findIndex(h=>norm(h)==='idlimpo') < 0) return false;
+  /* o cabecalho (ID LIMPO, COGS1...) pode estar na linha 1 (planilha antiga) ou
+     abaixo da linha USD/BRL (modelo atual): procura nas primeiras linhas */
+  let iHead = -1;
+  for (let r = 0; r < Math.min(cells.length, 10); r++){
+    if ((cells[r] || []).some(h=>norm(h)==='idlimpo')){ iHead = r; break; }
+  }
+  if (iHead < 0) return false;
+  const head = (cells[iHead] || []).map(x=>String(x==null?'':x).trim());
   const iId = head.findIndex(h=>norm(h)==='idlimpo');
   /* uma coluna por fonte do modelo; a planilha pode trazer so algumas.
      ESPECIAL aceita tambem a grafia em ingles. */
@@ -2942,7 +2996,21 @@ async function importarCustos(cells, fileName){
   const porChave = {};
   Object.keys(antes).forEach(k=>{ porChave[normSku(k)] = antes[k]; });
   const itens = {}, vistos = new Set();
-  for (let i = 1; i < cells.length; i++){
+  /* linha USD/BRL acima do cabecalho: cotacao de cada COGS, so informativa.
+     Sem essa linha, a cotacao gravada fica como estava. */
+  let fxPlan = null;
+  for (let r = 0; r < iHead; r++){
+    const lin = cells[r] || [];
+    if (!lin.some(x=>['usdbrl','usdbrlcotacao','cotacaousdbrl','cotacao','cambio'].indexOf(norm(x)) >= 0)) continue;
+    fxPlan = {};
+    FX_FONTES.forEach(f=>{
+      const j = col[FONTES.indexOf(f)];
+      const v = j >= 0 ? cstNum(lin[j]) : 0;
+      if (v > 0) fxPlan[f] = v;
+    });
+    break;
+  }
+  for (let i = iHead + 1; i < cells.length; i++){
     /* o ID entra como veio na planilha, com espacos e caixa preservados. Se
        duas linhas so diferem em espaco/caixa, vale a primeira. */
     const r = cells[i] || [], k = String(r[iId] == null ? '' : r[iId]).trim();
@@ -2986,6 +3054,7 @@ async function importarCustos(cells, fileName){
       if (v) ob[k] = v;
     });
     OBS_CUSTOS[cen] = ob;
+    if (fxPlan) CAMBIO[cen] = Object.assign({}, CAMBIO[cen] || {}, fxPlan);
     CST_BASES[cen] = {fontes, itens: JSON.parse(JSON.stringify(itens)), fixos: fx,
       grupos: gp, padrao: b0.padrao || CUSTOS.padrao || fontes[0],
       arquivo: fileName, itens_origem: JSON.parse(JSON.stringify(itens))};
@@ -3001,6 +3070,7 @@ async function importarCustos(cells, fileName){
          p_grupos: b1.grupos, p_cenario: cen, p_itens_origem: b1.itens_origem});
     }
     await obsGravar();
+    if (fxPlan) await cambioGravar();
     toast(t().custoSalvoNova(n));
   } catch(err){ toast(t().impErr + (err && err.message ? err.message : err), true); }
   return true;
@@ -3101,7 +3171,9 @@ async function sbLoadData(){
       const pf = await sbRpc('wgi_painel_prefs_ler', {});
       const ob = pf && pf.obs_custos;
       OBS_CUSTOS = (ob && typeof ob === 'object' && !Array.isArray(ob)) ? ob : {};
-    } catch(e){ OBS_CUSTOS = {}; }
+      const fx = pf && pf.cambio_custos;
+      CAMBIO = (fx && typeof fx === 'object' && !Array.isArray(fx)) ? fx : {};
+    } catch(e){ OBS_CUSTOS = {}; CAMBIO = {}; }
     S.custo = CUSTOS.fontes.indexOf(CUSTOS.padrao) >= 0 ? CUSTOS.padrao : CUSTOS.fontes[0];
     /* base antiga vinha com itens em "auto": todos passam a ter fonte propria */
     garantirFontes();
@@ -3174,12 +3246,14 @@ function sheetXml(rows, widths, extra){
       if (typeof v === 'number') return '<c r="'+ref+'"'+st+'><v>'+v+'</v></c>';
       return '<c r="'+ref+'"'+st+' t="inlineStr"><is><t xml:space="preserve">'+xe(v)+'</t></is></c>';
     }).join('');
-    return '<row r="'+(ri+1)+'"'+(ri===0?' ht="30" customHeight="1"':'')+'>'+cells+'</row>';
+    const alto = extra && extra.alto !== undefined ? extra.alto : 0;
+    return '<row r="'+(ri+1)+'"'+(ri===alto?' ht="30" customHeight="1"':'')+'>'+cells+'</row>';
   }).join('');
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
     + '<sheetViews><sheetView workbookViewId="0"'+(extra&&extra.nogrid?' showGridLines="0"':'')+'>'
-    + (extra&&extra.freeze?'<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>':'')
+    + (extra&&extra.freeze?'<pane ySplit="'+(+extra.freeze||1)+'" topLeftCell="A'+((+extra.freeze||1)+1)
+       +'" activePane="bottomLeft" state="frozen"/>':'')
     + '</sheetView></sheetViews>'
     + '<sheetFormatPr defaultRowHeight="14"/>' + cols
     + '<sheetData>'+body+'</sheetData></worksheet>';
