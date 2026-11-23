@@ -433,9 +433,9 @@ table.cst td.cc{padding:0}
 .cch{display:flex;flex-direction:column;gap:3px;align-items:stretch;padding:0 5px}
 /* botao que aplica a fonte da coluna a todos os itens listados */
 .cch .fs-all{
-  font:inherit;font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  font:inherit;font-size:8.5px;font-weight:700;letter-spacing:.02em;text-transform:none;
   border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--ink-3);
-  padding:2px 0;cursor:pointer;line-height:1.1;
+  padding:2px 3px;cursor:pointer;line-height:1.15;white-space:normal;
 }
 .cch .fs-all:hover{border-color:var(--cen);color:var(--cen)}
 .cch span{font-size:9px;font-weight:700;letter-spacing:.03em;color:var(--ink-3);
@@ -876,7 +876,10 @@ const normSku = v => String(v == null ? '' : v).toUpperCase().replace(/\s+/g, ''
    com quatro colunas nao apaga as outras duas, so nao traz valor para elas.
    Para acrescentar uma fonte, basta entrar nesta lista — tela, planilha de
    exportar/importar, banco e tabela de precos seguem daqui. */
-const FONTES = ['COGS1','COGS2','LANDED1','LANDED2','LANDED3','ESPECIAL'];
+/* LANDED1 e LANDED2 foram retirados: nao aparecem na tela, na planilha nem no
+   banco (a proxima gravacao de cada base ja sai sem eles). Planilha antiga que
+   ainda traga essas colunas e lida normalmente — as duas sao ignoradas. */
+const FONTES = ['COGS1','COGS2','LANDED3','ESPECIAL'];
 /* Nome mostrado de cada fonte. A chave interna continua LANDED3 (e o que esta
    gravado no banco e o que Relatorios e Lista de precos leem); na tela, no PDF
    e na planilha ela aparece como COGS3. */
@@ -1067,7 +1070,7 @@ const T = {
   cstTitulo:'Tabela de custos', cstAdd:'+ Linha', cstSalvar:'Salvar', cstFechar:'Fechar',
   cstSub:(n,f)=>n+' itens · '+f,
   cstItem:'ID limpo',
-  cstTodas:'todas', cstTodasTip:f=>'Usar '+f+' em todos os itens listados',
+  cstTodas:'adotar para todos', cstTodasTip:f=>'Usar '+f+' em todos os itens listados',
   cstExp:'Exportar .xlsx', cstImp:'Importar .xlsx',
   fxTip:'Cotação USD/BRL usada nesta fonte. Só informa, não entra em nenhuma conta. Muda pela linha USD/BRL da planilha de importação.',
   ftCol:'Foto', ftEnviar:c=>'Enviar foto de '+c, ftVer:c=>'Ver foto de '+c,
@@ -1081,7 +1084,7 @@ const T = {
   pdfBase:'Base', pdfArquivo:'Arquivo', pdfItens:'Itens', pdfGerado:'Gerado em', pdfPor:'por',
   pdfFiltro:'Filtro', pdfLeg:'● fonte marcada no item · * valor herdado de outro item do grupo · itens recuados seguem a referência acima',
   cstExpOk:n=>'Planilha de custos gerada com '+n+' itens.',
-  cstImpErr:'A planilha precisa ter a coluna ID LIMPO e ao menos uma coluna COGS/LANDED.',
+  cstImpErr:'A planilha precisa ter a coluna ID LIMPO e ao menos uma coluna de custo (COGS1, COGS2, COGS3 ou ESPECIAL).',
   cstBusca:'Filtrar item (ex.: 7FB55, 9800, WENFUSE)…',
   cstFonte:'Custo usado neste item', cstUsado:'Aplicado',
   cstFixos:n=>n+(n>1?' itens':' item')+' com fonte fixada',
@@ -1338,7 +1341,7 @@ const T = {
     +(+a>0 ? a+'% follows the <b>'+f+'</b> switch' : '')
     +(+c>0 ? '; '+c+'% keeps the margin reported in the sales sheet (no value in the picked source).' : '.'),
   cstItem:'Clean ID',
-  cstTodas:'all', cstTodasTip:f=>'Use '+f+' for every listed item',
+  cstTodas:'adopt for all', cstTodasTip:f=>'Use '+f+' for every listed item',
   cstExp:'Export .xlsx', cstImp:'Import .xlsx',
   fxTip:'USD/BRL rate used for this source. Information only, it does not enter any calculation. It changes through the USD/BRL row of the import sheet.',
   ftCol:'Photo', ftEnviar:c=>'Upload photo for '+c, ftVer:c=>'View photo of '+c,
@@ -1352,7 +1355,7 @@ const T = {
   pdfBase:'Basis', pdfArquivo:'File', pdfItens:'Items', pdfGerado:'Generated', pdfPor:'by',
   pdfFiltro:'Filter', pdfLeg:'● source ticked on the item · * value taken from another item in the group · indented items follow the reference above',
   cstExpOk:n=>'Cost sheet generated with '+n+' items.',
-  cstImpErr:'The sheet needs an ID LIMPO column and at least one COGS/LANDED column.',
+  cstImpErr:'The sheet needs an ID LIMPO column and at least one cost column (COGS1, COGS2, COGS3 or ESPECIAL).',
   cstBusca:'Filter item (e.g. 7FB55, 9800, WENFUSE)…',
   cstFonte:'Cost used for this item', cstUsado:'Applied',
   cstFixos:n=>n+' item'+(n>1?'s':'')+' pinned to a source',
@@ -2521,7 +2524,7 @@ el('cstSave').onclick = async () => {
 
 /* ============ exportar / importar a tabela de custos ============
    Uma planilha, aba TABELA: uma linha por item e uma COLUNA POR FONTE de
-   custo (COGS1, COGS2, LANDED1, LANDED2). A planilha carrega so os VALORES —
+   custo (COGS1, COGS2, COGS3, ESPECIAL). A planilha carrega so os VALORES —
    a escolha de fonte de cada item vive na tela e no banco, nao na planilha.
    E o mesmo formato que a importacao le, entao exportar, editar no Excel e
    importar de volta fecha o ciclo sem mexer nas escolhas. */
@@ -2959,7 +2962,7 @@ const serialToISO = v => {
 };
 const norm = s => String(s??'').toLowerCase().replace(/[^a-z0-9]/g,'');
 /* A planilha de custos tem uma aba TABELA com ID LIMPO + as colunas de
-   cada fonte (COGS1, COGS2, LANDED1, LANDED2). Reconhecida pelo cabecalho,
+   cada fonte (COGS1, COGS2, COGS3, ESPECIAL). Reconhecida pelo cabecalho,
    entra pelo mesmo botao de importar e vai para o banco. A planilha traz
    so valores: quem ja existia mantem a fonte marcada nele e item novo entra
    na fonte padrao (garantirFontes). Coluna FONTE, se vier de um arquivo
