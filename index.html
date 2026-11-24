@@ -1059,7 +1059,7 @@ const T = {
   cstImpErr:'A planilha precisa ter a coluna ID LIMPO e ao menos uma coluna de custo (COGS1, COGS2, COGS3 ou ESPECIAL).',
   cstBusca:'Filtrar item (ex.: 7FB55, 9800, WENFUSE)…',
   cstFonte:'Custo usado neste item', cstUsado:'COGS aplicado', cstFxUso:'USD/BRL COGS',
-  cstFxUsoTip:'Cotação USD/BRL do COGS aplicado neste item (só informa). ESPECIAL não tem cotação.',
+  cstFxUsoTip:'Cotação USD/BRL do COGS aplicado neste item (só informa).',
   cstFixos:n=>n+(n>1?' itens':' item')+' com fonte fixada',
   cstUso:'Só os vendidos', cstCnt:(n,tt)=>n+' de '+tt+' itens',
   cstOcultos:n=>n+(n===1?' atribuído oculto':' atribuídos ocultos'),
@@ -1325,7 +1325,7 @@ const T = {
   cstImpErr:'The sheet needs an ID LIMPO column and at least one cost column (COGS1, COGS2, COGS3 or ESPECIAL).',
   cstBusca:'Filter item (e.g. 7FB55, 9800, WENFUSE)…',
   cstFonte:'Cost used for this item', cstUsado:'Applied COGS', cstFxUso:'USD/BRL COGS',
-  cstFxUsoTip:'USD/BRL rate of the COGS applied to this item (information only). ESPECIAL has no rate.',
+  cstFxUsoTip:'USD/BRL rate of the COGS applied to this item (information only).',
   cstFixos:n=>n+' item'+(n>1?'s':'')+' pinned to a source',
   cstUso:'Sold only', cstCnt:(n,tt)=>n+' of '+tt+' items',
   cstOcultos:n=>n+(n===1?' assigned item hidden':' assigned items hidden'),
@@ -1610,7 +1610,8 @@ async function obsGravar(){
    Nao se edita na tela — vem da linha "USD/BRL" no topo da planilha de
    importacao. Fica nas preferencias do painel (chave cambio_custos), por
    cenario: {cenario:{COGS1:5.516, COGS2:5.1635, LANDED3:4.9859}}. */
-const FX_FONTES = ['COGS1','COGS2','LANDED3'];
+/* ESPECIAL tambem leva cotacao: a linha USD/BRL da planilha preenche as quatro */
+const FX_FONTES = ['COGS1','COGS2','LANDED3','ESPECIAL'];
 let CAMBIO = {};
 const cambioDe = (cen, f) => { const v = +((CAMBIO[cen] || {})[f]); return isFinite(v) && v > 0 ? v : 0; };
 async function cambioGravar(){
