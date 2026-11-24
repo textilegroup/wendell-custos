@@ -460,10 +460,6 @@ table.cst td.cc.herd input.num{background:repeating-linear-gradient(-45deg,
 table.cst td.uso b.herd{border-bottom:1px dotted var(--ink-3)}
 table.cst th.obs,table.cst td.obs{width:120px;max-width:120px;border-left:1px solid var(--line-2)}
 table.cst td.obs input{text-overflow:ellipsis}
-/* Another USD/BRL: digitado item a item, 4 casas */
-table.cst th.fx2,table.cst td.fx2{width:96px;text-align:right;border-left:1px solid var(--line-2)}
-table.cst td.fx2 input{text-align:right;font-variant-numeric:tabular-nums}
-table.cst td.fx2 i{font-style:normal;color:var(--ink-3);padding:0 9px}
 /* cotacao USD/BRL do COGS aplicado no item: so informa */
 table.cst th.fxu,table.cst td.fxu{width:84px;text-align:right;white-space:nowrap}
 table.cst td.fxu{padding:0 9px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
@@ -500,28 +496,6 @@ table.cst th.gck{text-align:center;padding:4px 0}
 .recolhe.on{background:var(--cen);color:#fff}
 .gsel.bt{border:0;cursor:pointer;font-family:inherit;line-height:1.4}
 .gsel.bt:hover{filter:brightness(1.15)}
-/* foto do produto */
-table.cst th.foto,table.cst td.foto{width:46px;text-align:center;padding:2px 4px}
-.ft{display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border-radius:6px;
-  border:1.5px dashed var(--line);background:var(--card);color:var(--ink-3);cursor:pointer;overflow:hidden;vertical-align:middle}
-.ft svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.ft:hover{border-color:var(--cen);color:var(--cen)}
-.ft.has{border:1px solid var(--line)}
-.ft img{width:100%;height:100%;object-fit:cover;display:block}
-.ft.no{cursor:help;border-color:transparent;opacity:.45}
-.ft.busy{opacity:.5;pointer-events:none;animation:ftp 1s infinite alternate}
-@keyframes ftp{to{opacity:.2}}
-#fotoBox{position:fixed;inset:0;z-index:80;background:rgba(20,16,20,.55);display:grid;place-items:center;padding:20px}
-#fotoBox[hidden]{display:none}
-#fotoBox .fb{background:var(--card);border-radius:12px;box-shadow:0 10px 50px rgba(0,0,0,.35);
-  max-width:min(92vw,900px);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
-#fotoBox .fb-hd{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:2px solid var(--cen)}
-#fotoBox .fb-hd b{font-size:12px;letter-spacing:.06em;color:var(--cen)}
-#fotoBox .fb-hd span{margin-left:auto;display:flex;gap:6px}
-#fotoBox .fb-hd button{font:inherit;font-size:11px;font-weight:700;padding:5px 11px;border-radius:7px;
-  border:1px solid var(--line);background:var(--sunk);color:var(--ink-2);cursor:pointer}
-#fotoBox .fb-hd button.rm{color:var(--wine-soft);border-color:var(--wine-soft)}
-#fotoBox img{display:block;max-width:100%;max-height:calc(92vh - 60px);object-fit:contain;margin:auto;background:var(--sunk)}
 .gsel{display:inline-block;margin-left:7px;font-size:8.5px;font-weight:700;letter-spacing:.04em;
   padding:1px 5px;border-radius:4px;background:var(--cen);color:#fff;vertical-align:1px}
 /* ---- guia Agrupamento de itens ---- */
@@ -832,13 +806,6 @@ footer{font-size:10.5px;color:var(--ink-3);text-align:center;padding:2px 0 0;lin
 </header>
 <div id="tip" role="status" aria-live="polite"></div>
 <div id="toast" role="status" aria-live="polite"></div>
-<input type="file" id="fotoFile" accept="image/jpeg,image/png,image/webp" hidden>
-<div id="fotoBox" hidden><div class="fb" role="dialog" aria-modal="true">
-  <div class="fb-hd"><b id="fotoCod"></b><span>
-    <button type="button" id="fotoTroca"></button>
-    <button type="button" class="rm" id="fotoRem"></button>
-    <button type="button" id="fotoFecha"></button></span></div>
-  <img id="fotoImg" alt=""></div></div>
 <div id="cstModal" class="no-print" hidden>
   <div class="cst-box" role="dialog" aria-modal="true" aria-labelledby="cstTitulo">
     <div class="cst-hd">
@@ -1084,13 +1051,7 @@ const T = {
   cstTodas:'adotar para todos', cstTodasTip:f=>'Usar '+f+' em todos os itens listados',
   cstExp:'Exportar .xlsx', cstImp:'Importar .xlsx',
   fxTip:'Cotação USD/BRL usada nesta fonte. Só informa, não entra em nenhuma conta. Muda pela linha USD/BRL da planilha de importação.',
-  ftCol:'Foto', ftEnviar:c=>'Enviar foto de '+c, ftVer:c=>'Ver foto de '+c,
-  ftSemProduto:c=>'"'+c+'" não é um código de produto do catálogo (pode ser apelido de grupo): foto aqui não apareceria na tabela de preços.',
-  ftTrocar:'Trocar foto', ftRemover:'Remover foto', ftFechar:'Fechar',
-  ftRemConf:c=>'Remover a foto de '+c+'?\n\nA tabela de preços deixa de mostrar a foto deste item.',
-  ftTipo:'Envie uma imagem JPG, PNG ou WEBP.', ftGrande:'Imagem grande demais (máximo 15 MB).',
-  ftOk:c=>'Foto de '+c+' gravada. A tabela de preços já mostra.', ftRemOk:c=>'Foto de '+c+' removida.',
-  ftEnviando:'Enviando…', ftSemBanco:'Fotos só funcionam com o banco conectado.', cstPdf:'Exportar PDF',
+  cstPdf:'Exportar PDF',
   pdfTitulo:'Tabela de custos', pdfEmpresa:'Wendell Global Interlining · Brasil',
   pdfBase:'Base', pdfArquivo:'Arquivo', pdfItens:'Itens', pdfGerado:'Gerado em', pdfPor:'por',
   pdfFiltro:'Filtro', pdfLeg:'● fonte marcada no item · * valor herdado de outro item do grupo · itens recuados seguem a referência acima',
@@ -1098,7 +1059,6 @@ const T = {
   cstImpErr:'A planilha precisa ter a coluna ID LIMPO e ao menos uma coluna de custo (COGS1, COGS2, COGS3 ou ESPECIAL).',
   cstBusca:'Filtrar item (ex.: 7FB55, 9800, WENFUSE)…',
   cstFonte:'Custo usado neste item', cstUsado:'COGS aplicado', cstFxUso:'USD/BRL COGS',
-  cstFx2:'Another USD/BRL', cstFx2Tip:'Outra cotação USD/BRL para este item, com 4 casas decimais (ex.: 5,4321).',
   cstFxUsoTip:'Cotação USD/BRL do COGS aplicado neste item (só informa). ESPECIAL não tem cotação.',
   cstFixos:n=>n+(n>1?' itens':' item')+' com fonte fixada',
   cstUso:'Só os vendidos', cstCnt:(n,tt)=>n+' de '+tt+' itens',
@@ -1357,13 +1317,7 @@ const T = {
   cstTodas:'adopt for all', cstTodasTip:f=>'Use '+f+' for every listed item',
   cstExp:'Export .xlsx', cstImp:'Import .xlsx',
   fxTip:'USD/BRL rate used for this source. Information only, it does not enter any calculation. It changes through the USD/BRL row of the import sheet.',
-  ftCol:'Photo', ftEnviar:c=>'Upload photo for '+c, ftVer:c=>'View photo of '+c,
-  ftSemProduto:c=>'"'+c+'" is not a catalogue product code (it may be a group alias): a photo here would not show in the price list.',
-  ftTrocar:'Replace photo', ftRemover:'Remove photo', ftFechar:'Close',
-  ftRemConf:c=>'Remove the photo of '+c+'?\n\nThe price list stops showing a photo for this item.',
-  ftTipo:'Upload a JPG, PNG or WEBP image.', ftGrande:'Image too large (15 MB max).',
-  ftOk:c=>'Photo of '+c+' saved. The price list already shows it.', ftRemOk:c=>'Photo of '+c+' removed.',
-  ftEnviando:'Uploading…', ftSemBanco:'Photos only work with the database connected.', cstPdf:'Export PDF',
+  cstPdf:'Export PDF',
   pdfTitulo:'Cost table', pdfEmpresa:'Wendell Global Interlining · Brazil',
   pdfBase:'Basis', pdfArquivo:'File', pdfItens:'Items', pdfGerado:'Generated', pdfPor:'by',
   pdfFiltro:'Filter', pdfLeg:'● source ticked on the item · * value taken from another item in the group · indented items follow the reference above',
@@ -1371,7 +1325,6 @@ const T = {
   cstImpErr:'The sheet needs an ID LIMPO column and at least one cost column (COGS1, COGS2, COGS3 or ESPECIAL).',
   cstBusca:'Filter item (e.g. 7FB55, 9800, WENFUSE)…',
   cstFonte:'Cost used for this item', cstUsado:'Applied COGS', cstFxUso:'USD/BRL COGS',
-  cstFx2:'Another USD/BRL', cstFx2Tip:'Another USD/BRL rate for this item, with 4 decimal places (e.g. 5.4321).',
   cstFxUsoTip:'USD/BRL rate of the COGS applied to this item (information only). ESPECIAL has no rate.',
   cstFixos:n=>n+' item'+(n>1?'s':'')+' pinned to a source',
   cstUso:'Sold only', cstCnt:(n,tt)=>n+' of '+tt+' items',
@@ -1653,20 +1606,6 @@ async function obsGravar(){
   if (!SB_ON) return;
   await sbRpc('wgi_painel_prefs_gravar', {p_chave:'obs_custos', p_valor: OBS_CUSTOS});
 }
-/* "Another USD/BRL": cotacao alternativa digitada item a item, 4 casas.
-   Por enquanto so fica registrada (nao entra em conta). Mora nas preferencias
-   do painel (chave cambio_item), por cenario: {cenario:{SKU:5.4321}}. */
-let CAMBIO_ITEM = {};
-const fx2De = (cen, sku) => {
-  const m = CAMBIO_ITEM[cen] || {}, n = normSku(sku);
-  const k = Object.keys(m).find(x=>normSku(x) === n);
-  const v = k ? +m[k] : 0; return isFinite(v) && v > 0 ? v : 0;
-};
-async function fx2Gravar(){
-  if (!SB_ON) return;
-  await sbRpc('wgi_painel_prefs_gravar', {p_chave:'cambio_item', p_valor: CAMBIO_ITEM});
-}
-const fx2Txt = v => v > 0 ? nf4(v) : '';
 /* Cotacao USD/BRL usada em cada COGS. So INFORMA: nao entra em conta nenhuma.
    Nao se edita na tela — vem da linha "USD/BRL" no topo da planilha de
    importacao. Fica nas preferencias do painel (chave cambio_custos), por
@@ -1712,7 +1651,6 @@ function cstGuarda(){
   b.itens = c.itens; b.fixos = c.fixos; b.grupos = c.grupos;
   b.padrao = CUSTOS.fontes[CST_PAD] || b.padrao;
   OBS_CUSTOS[CST_CEN] = c.obs;
-  CAMBIO_ITEM[CST_CEN] = c.fx2;
 }
 /* joga a base do cenario na tela */
 function cstCarrega(cen){
@@ -1724,8 +1662,7 @@ function cstCarrega(cen){
     sku: k, v: CUSTOS.fontes.map((f,i)=> cst4((b.itens[k]||[])[i])),
     /* sem escolha gravada, o item segue a fonte padrao do cenario */
     fixo: (CUSTOS.fontes.indexOf((b.fixos||{})[k]) >= 0 ? b.fixos[k] : padCen),
-    obs: obsDe(src, k),
-    fx2: fx2De(src, k)
+    obs: obsDe(src, k)
   }));
   CST_GRUPOS = {};
   Object.keys(b.grupos || {}).forEach(ref=>{
@@ -1955,12 +1892,10 @@ function cstRender(){
          : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4h10M6 8h7M6 12h7M3 7v5"/></svg>')
       + '</button>' : '')
     + '</th><th class="idc">'+esc(L.cstItem)+'</th>'
-    + (fotoOn() ? '<th class="foto">'+esc(L.ftCol)+'</th>' : '')
     + cabFontes
     + '<th class="obs" title="'+esc(L.cstObsTip)+'">'+esc(L.cstObs)+'</th>'
     + '<th class="num">'+esc(L.cstUsado)+'</th>'
     + '<th class="fxu" title="'+esc(L.cstFxUsoTip)+'">'+esc(L.cstFxUso)+'</th>'
-    + '<th class="fx2" title="'+esc(L.cstFx2Tip)+'">'+esc(L.cstFx2)+'</th>'
     + '<th class="gtag">'+esc(L.grSituacao)+'</th></tr></thead><tbody>'
     + (vis.length ? vis.map(x=>{
         const o = x[0], i = x[1];
@@ -2021,7 +1956,6 @@ function cstRender(){
                + '" spellcheck="false"' + ROT
                + ((ehRef || ehMembro) ? ' readonly title="'+esc(L.cstIdTravado)+'"' : '')
                + '>' + selo + '</div></td>')
-          + (fotoOn() ? fotoCel(o.sku) : '')
           + CUSTOS.fontes.map(cel).join('')
           + (i < 0 ? '<td class="obs vazio">–</td>'
              : '<td class="obs"><input data-i="'+i+'" data-k="obs" maxlength="300"'
@@ -2032,14 +1966,9 @@ function cstRender(){
           + (i < 0 || ehMembro
              ? '<td class="fxu"><i>–</i></td>'
              : '<td class="fxu" data-fxu="'+i+'">'+cstFxTxt(o, ef)+'</td>')
-          + (i < 0
-             ? '<td class="fx2"><i>–</i></td>'
-             : '<td class="fx2"><input class="num" data-i="'+i+'" data-k="fx2" inputmode="decimal"'
-               + ' placeholder="0'+(S.lang==='en'?'.':',')+'0000" value="'+esc(fx2Txt(+o.fx2))+'"'
-               + ' title="'+esc(L.cstFx2Tip)+'"' + ROT + '></td>')
           + '<td class="gtag">'+tag+'</td></tr>';
       }).join('')
-      : '<tr><td class="empty" colspan="'+(CUSTOS.fontes.length+7+(fotoOn()?1:0))+'"'
+      : '<tr><td class="empty" colspan="'+(CUSTOS.fontes.length+6)+'"'
         + ' style="padding:14px;color:var(--ink-3)">' + esc(L.cstVazio) + '</td></tr>')
     + '</tbody></table>');
   /* a barra de acoes muda de altura conforme a mensagem: mede e avisa o
@@ -2316,17 +2245,14 @@ async function cstAplicarAgora(btn){
       CST_BASES[alvo] = JSON.parse(JSON.stringify(CST_BASES[CST_CEN]));
       OBS_CUSTOS[alvo] = JSON.parse(JSON.stringify(OBS_CUSTOS[CST_CEN] || {}));
       CAMBIO[alvo] = JSON.parse(JSON.stringify(CAMBIO[CST_CEN] || {}));
-      CAMBIO_ITEM[alvo] = JSON.parse(JSON.stringify(CAMBIO_ITEM[CST_CEN] || {}));
       await obsGravar();
       await cambioGravar();
-      await fx2Gravar();
       toast(prec ? L.cenAplicarPrecosOk((d && d.itens) || '')
                  : L.cenAplicarOk(L.cenGrupo(alvo), (d && d.itens) || ''));
     } else {
       CST_BASES[alvo] = JSON.parse(JSON.stringify(CST_BASES[CST_CEN]));
       OBS_CUSTOS[alvo] = JSON.parse(JSON.stringify(OBS_CUSTOS[CST_CEN] || {}));
       CAMBIO[alvo] = JSON.parse(JSON.stringify(CAMBIO[CST_CEN] || {}));
-      CAMBIO_ITEM[alvo] = JSON.parse(JSON.stringify(CAMBIO_ITEM[CST_CEN] || {}));
       toast(L.custoLocal);
     }
     if (alvo === 'relatorio_atual') cenParaCUSTOS('relatorio_atual');
@@ -2402,12 +2328,6 @@ function cstUsoTxt(o, vef){
     + esc(cstTxt(e.u)) + (e.de ? '*' : '') + '</b>'
     + '<i class="'+(e.fixo?'fx':'')+'">'+esc(fNome(e.src))+'</i>';
 }
-/* Another USD/BRL: ao sair do campo, mostra sempre com 4 casas */
-el('cstGrid').addEventListener('change', e=>{
-  const n = e.target; if (!n.dataset || n.dataset.k !== 'fx2') return;
-  const o = CST_EDIT[+n.dataset.i]; if (!o) return;
-  o.fx2 = cstNum(n.value); n.value = fx2Txt(o.fx2);
-});
 el('cstQ').addEventListener('input', e=>{ CST_Q = e.target.value; cstRender(); });
 el('cstUso').onclick = () => {
   CST_USO = !CST_USO;
@@ -2435,7 +2355,6 @@ el('cstGrid').addEventListener('input', e=>{
   /* o ID fica como o usuario digitou; o casamento e por normSku, nao pelo texto */
   else if (n.dataset.k === 'sku') o.sku = n.value;
   else if (n.dataset.k === 'obs'){ o.obs = n.value; n.title = n.value; cstAplicarDebounce(); return; }
-  else if (n.dataset.k === 'fx2'){ o.fx2 = cstNum(n.value); cstAplicarDebounce(); return; }
   else o.v[+n.dataset.f] = cstNum(n.value);
   /* atualiza so a celula do custo aplicado: nao redesenha a lista nem
      perde a rolagem ou o campo em edicao */
@@ -2466,7 +2385,7 @@ el('cstAdd').onclick = () => {
     return; }
   /* linha nova ja nasce com a fonte padrao marcada, na guia Custos */
   CST_TAB = 'custos'; GR_SEL = [];
-  CST_EDIT.push({sku:'', v:CUSTOS.fontes.map(()=>0), fixo:CUSTOS.fontes[CST_PAD] || '', obs:'', fx2:0});
+  CST_EDIT.push({sku:'', v:CUSTOS.fontes.map(()=>0), fixo:CUSTOS.fontes[CST_PAD] || '', obs:''});
   CST_Q = ''; CST_USO = false;
   el('cstQ').value = ''; el('cstUso').setAttribute('aria-pressed','false');
   cstRender();
@@ -2481,7 +2400,7 @@ el('cstAdd').onclick = () => {
    Duas linhas que so diferem em espaco/caixa sao o mesmo item: fica a
    primeira. Usado tanto pelo recalculo ao vivo quanto pelo Salvar. */
 function cstColeta(){
-  const itens = {}, fixos = {}, obs = {}, fx2 = {}, vistos = {}, dups = [];
+  const itens = {}, fixos = {}, obs = {}, vistos = {}, dups = [];
   let vazio = false;
   CST_EDIT.forEach(o=>{
     const k = String(o.sku == null ? '' : o.sku).trim();
@@ -2493,7 +2412,6 @@ function cstColeta(){
     if (o.fixo && CUSTOS.fontes.indexOf(o.fixo) >= 0) fixos[k] = o.fixo;
     const ob = String(o.obs || '').trim();
     if (ob) obs[k] = ob;
-    if (+o.fx2 > 0) fx2[k] = cst4(o.fx2);
   });
   /* grupos da guia Agrupamento, limpos de item que nao existe mais */
   const grupos = {};
@@ -2502,7 +2420,7 @@ function cstColeta(){
     const mem = (CST_GRUPOS[ref] || []).filter(m=>m && m !== ref);
     if (mem.length) grupos[ref] = mem;
   });
-  return {itens, fixos, grupos, obs, fx2, vazio, dups};
+  return {itens, fixos, grupos, obs, vazio, dups};
 }
 /* Recalculo ao vivo: passa o estado da tela para o CUSTOS e redesenha o
    dashboard. Nao grava nada no banco — quem grava e o Salvar. Enquanto houver
@@ -2548,7 +2466,6 @@ async function cstSalvarCenario(cen){
   }
   if (!Object.keys(b.itens_origem || {}).length) b.itens_origem = b.itens;
   OBS_CUSTOS[cen] = c.obs;
-  CAMBIO_ITEM[cen] = c.fx2;
   /* gravando a base adotada do outro lado, a cotacao dela vem junto */
   if (cenEspelhado(cen)) CAMBIO[cen] = JSON.parse(JSON.stringify(CAMBIO[cenFonte(cen)] || {}));
   if (!SB_ON) return {itens:n, local:true};
@@ -2557,7 +2474,6 @@ async function cstSalvarCenario(cen){
     p_padrao: b.padrao, p_fixos: b.fixos, p_grupos: b.grupos,
     p_cenario: cen, p_itens_origem: b.itens_origem});
   await obsGravar();
-  await fx2Gravar();
   if (cenEspelhado(cen)) await cambioGravar();
   return r;
 }
@@ -2784,119 +2700,6 @@ el('cstPdf').onclick = () => {
   };
   if (doc.readyState === 'complete') imprime(); else fr.onload = imprime;
 };
-
-/* ============ foto do produto por item ============
-   A foto mora no bucket wgi-fotos e a tabela wgi_produto_foto liga o CODIGO
-   VENDAVEL (exatamente como em wgi_products.code) a URL. A tabela de precos so
-   le. Nao entra na planilha de custos: chaveada pelo codigo, sobrevive a
-   qualquer recarga. Apelido de grupo de custo nao e codigo de produto. */
-let FOTOS = {}, PROD_CODES = null, FOTO_ALVO = '';
-const fotoSb = () => { const g = GUARD(); return g && g.sb && g.sb.storage ? g.sb : null; };
-const fotoOn = () => SB_ON && ADM && !!fotoSb();
-/* codigo do catalogo para o ID da linha; '' quando nao e produto */
-const fotoCode = sku => PROD_CODES ? (PROD_CODES[normSku(sku)] || '') : String(sku || '').trim();
-async function fotosCarrega(){
-  const sb = fotoSb(); if (!sb) return;
-  try{
-    const r = await sb.from('wgi_produto_foto').select('code,url,caminho');
-    if (!r.error){ FOTOS = {}; (r.data || []).forEach(x=>{ FOTOS[normSku(x.code)] = x; }); }
-  } catch(e){}
-  try{
-    const p = await sb.from('wgi_products').select('code');
-    if (!p.error && p.data && p.data.length){
-      PROD_CODES = {}; p.data.forEach(x=>{ if (x.code) PROD_CODES[normSku(x.code)] = x.code; });
-    }
-  } catch(e){}
-  if (!el('cstModal').hidden) cstRender();
-}
-const FT_ICO = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9.5" rx="1.5"/>'
-  + '<circle cx="6" cy="7" r="1.2"/><path d="M2.5 12l3.5-3.2 2.5 2.2 2-1.6 3 2.6"/></svg>';
-function fotoCel(sku){
-  const L = t(), code = fotoCode(sku);
-  if (!code) return '<td class="foto"><span class="ft no" title="'+esc(L.ftSemProduto(sku))+'">'+FT_ICO+'</span></td>';
-  const f = FOTOS[normSku(code)];
-  return '<td class="foto">' + (f
-    ? '<button type="button" class="ft has" data-foto="'+esc(code)+'" title="'+esc(L.ftVer(code))+'">'
-      + '<img src="'+esc(f.url)+'" alt="" loading="lazy"></button>'
-    : '<button type="button" class="ft" data-foto="'+esc(code)+'" title="'+esc(L.ftEnviar(code))+'">'+FT_ICO+'</button>')
-    + '</td>';
-}
-/* encolhe no navegador: lado maior 1200px, JPEG 0,8 (fundo branco p/ PNG transparente) */
-async function fotoEncolhe(file){
-  const url = URL.createObjectURL(file);
-  try{
-    const img = await new Promise((ok, no)=>{ const i = new Image(); i.onload = ()=>ok(i); i.onerror = no; i.src = url; });
-    const k = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
-    const c = document.createElement('canvas');
-    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
-    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
-    x.drawImage(img, 0, 0, c.width, c.height);
-    return await new Promise(ok=>c.toBlob(ok, 'image/jpeg', 0.8));
-  } finally { URL.revokeObjectURL(url); }
-}
-async function fotoEnviar(code, arquivo){
-  const L = t(), sb = fotoSb();
-  if (!sb){ toast(L.ftSemBanco, true); return; }
-  if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0){ toast(L.ftTipo, true); return; }
-  if (arquivo.size > 15*1024*1024){ toast(L.ftGrande, true); return; }
-  const bt = el('cstGrid').querySelector('[data-foto="'+CSS.escape(code)+'"]');
-  if (bt) bt.classList.add('busy');
-  toast(L.ftEnviando);
-  try{
-    const blob = await fotoEncolhe(arquivo);
-    const slug = code.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    const caminho = slug + '-' + Date.now() + '.jpg';      /* nome novo a cada troca: sem cache velho */
-    const up = await sb.storage.from('wgi-fotos').upload(caminho, blob, {contentType:'image/jpeg', upsert:false});
-    if (up.error) throw up.error;
-    const url = sb.storage.from('wgi-fotos').getPublicUrl(caminho).data.publicUrl;
-    const ant = await sb.from('wgi_produto_foto').select('caminho').eq('code', code).maybeSingle();
-    const anterior = ant && ant.data && ant.data.caminho;
-    const gr = await sb.from('wgi_produto_foto').upsert(
-      {code, url, caminho, atualizado_em: new Date().toISOString()}, {onConflict:'code'});
-    if (gr.error){ await sb.storage.from('wgi-fotos').remove([caminho]); throw gr.error; }
-    /* so depois que o novo esta gravado e que o antigo sai */
-    if (anterior && anterior !== caminho) await sb.storage.from('wgi-fotos').remove([anterior]);
-    FOTOS[normSku(code)] = {code, url, caminho};
-    toast(L.ftOk(code));
-    if (!el('fotoBox').hidden) fotoAbre(code);
-  } catch(err){ toast(L.impErr + (err && err.message ? err.message : err), true); }
-  finally { cstRender(); }
-}
-async function fotoRemover(code){
-  const L = t(), sb = fotoSb(); if (!sb) return;
-  if (!confirm(L.ftRemConf(code))) return;
-  try{
-    const f = FOTOS[normSku(code)] || {};
-    const d = await sb.from('wgi_produto_foto').delete().eq('code', code);
-    if (d.error) throw d.error;
-    if (f.caminho) await sb.storage.from('wgi-fotos').remove([f.caminho]);
-    delete FOTOS[normSku(code)];
-    fotoFecha(); cstRender(); toast(L.ftRemOk(code));
-  } catch(err){ toast(L.impErr + (err && err.message ? err.message : err), true); }
-}
-function fotoAbre(code){
-  const L = t(), f = FOTOS[normSku(code)]; if (!f) return;
-  FOTO_ALVO = code;
-  set('fotoCod', code); set('fotoTroca', L.ftTrocar); set('fotoRem', L.ftRemover); set('fotoFecha', L.ftFechar);
-  el('fotoImg').src = f.url; el('fotoImg').alt = code;
-  el('fotoBox').hidden = false;
-}
-function fotoFecha(){ el('fotoBox').hidden = true; el('fotoImg').removeAttribute('src'); }
-el('cstGrid').addEventListener('click', e=>{
-  const b = e.target.closest('button[data-foto]'); if (!b) return;
-  const code = b.dataset.foto;
-  if (FOTOS[normSku(code)]) fotoAbre(code);
-  else { FOTO_ALVO = code; el('fotoFile').click(); }
-});
-el('fotoFile').onchange = e => {
-  const f = e.target.files[0]; e.target.value = '';
-  if (f && FOTO_ALVO) fotoEnviar(FOTO_ALVO, f);
-};
-el('fotoTroca').onclick = () => el('fotoFile').click();
-el('fotoRem').onclick = () => fotoRemover(FOTO_ALVO);
-el('fotoFecha').onclick = fotoFecha;
-el('fotoBox').addEventListener('click', e=>{ if (e.target.id === 'fotoBox') fotoFecha(); });
-document.addEventListener('keydown', e=>{ if (e.key === 'Escape' && !el('fotoBox').hidden) fotoFecha(); });
 
 /* abre um .xlsx e devolve as celulas da aba pedida (ou da primeira) */
 async function abasDoXlsx(f, nomePreferido){
@@ -3241,9 +3044,7 @@ async function sbLoadData(){
       OBS_CUSTOS = (ob && typeof ob === 'object' && !Array.isArray(ob)) ? ob : {};
       const fx = pf && pf.cambio_custos;
       CAMBIO = (fx && typeof fx === 'object' && !Array.isArray(fx)) ? fx : {};
-      const f2 = pf && pf.cambio_item;
-      CAMBIO_ITEM = (f2 && typeof f2 === 'object' && !Array.isArray(f2)) ? f2 : {};
-    } catch(e){ OBS_CUSTOS = {}; CAMBIO = {}; CAMBIO_ITEM = {}; }
+    } catch(e){ OBS_CUSTOS = {}; CAMBIO = {}; }
     S.custo = CUSTOS.fontes.indexOf(CUSTOS.padrao) >= 0 ? CUSTOS.padrao : CUSTOS.fontes[0];
     /* base antiga vinha com itens em "auto": todos passam a ter fonte propria */
     garantirFontes();
@@ -3392,7 +3193,6 @@ async function arranca(){
     const ok = await sbLoadData();
     applyRole();
     abrirPainel();
-    fotosCarrega();
     cstAbrir(); // Wendell Custos: entra direto na Matriz de Custos, sem dashboard por trás
     if (!ok) toast(t().semDados, true);
   } catch(err){
